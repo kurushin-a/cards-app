@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Cards</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<!-- Локальные копии: приложение должно работать без интернета -->
+<link rel="stylesheet" href="vendor/katex.min.css">
+<link rel="stylesheet" href="vendor/atom-one-dark.min.css">
+<script src="vendor/katex.min.js"></script>
+<script src="vendor/auto-render.min.js"></script>
+<script src="vendor/hljs.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f1117; --bg2:#1a1d27; --bg3:#22263a;
+  --border:#2e3248; --text:#e2e8f0; --text2:#94a3b8;
+  --accent:#6366f1; --accentH:#818cf8;
+  --red:#ef4444; --amber:#f59e0b; --green:#22c55e;
+  --safeT:env(safe-area-inset-top,0px);
+  --safeB:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;overscroll-behavior:none}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);color:var(--text);
+  font-size:17px;line-height:1.6;
+  -webkit-text-size-adjust:100%;
+}
+button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.hidden{display:none!important}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column}
+
+/* ── generic top bar ───────────────────────────── */
+.topbar{
+  flex-shrink:0;padding:calc(var(--safeT) + 10px) 12px 10px;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;min-height:52px;
+}
+.topbar h1{font-size:18px;font-weight:700;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.icon-btn{
+  width:40px;height:40px;flex-shrink:0;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:var(--text2);
+}
+.icon-btn:active{background:var(--bg3)}
+
+/* ── load screen ───────────────────────────────── */
+#load{align-items:center;justify-content:center;padding:32px 24px;gap:18px;text-align:center}
+#load .logo{font-size:44px}
+#load h1{font-size:26px;font-weight:700}
+#load p{color:var(--text2);font-size:15px;max-width:320px}
+#load-current{
+  display:none;max-width:320px;width:100%;
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;font-size:14px;color:var(--text2);line-height:1.55;
+}
+#load-current b{color:var(--text);word-break:break-all}
+.btn-big{
+  width:100%;max-width:320px;padding:16px;border-radius:14px;
+  font-size:17px;font-weight:600;background:var(--accent);color:#fff;
+}
+.btn-big:active{background:var(--accentH)}
+.btn-ghost-big{
+  width:100%;max-width:320px;padding:15px;border-radius:14px;
+  font-size:16px;font-weight:500;background:var(--bg2);
+  border:1px solid var(--border);color:var(--text2);
+}
+.btn-ghost-big:active{background:var(--bg3)}
+
+/* ── экран подключения ─────────────────────────── */
+#setup-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:18px 16px calc(var(--safeB) + 28px)}
+.setup-hint{color:var(--text2);font-size:14.5px;line-height:1.6;margin-bottom:22px}
+.fld{display:block;margin-bottom:16px}
+.fld>span{display:block;font-size:12.5px;font-weight:600;color:var(--text2);
+  margin-bottom:7px;letter-spacing:.2px}
+.fld input{
+  width:100%;padding:14px;border-radius:12px;font-size:16px;
+  background:var(--bg2);border:1px solid var(--border);color:var(--text);
+  outline:none;-webkit-appearance:none;
+}
+.fld input:focus{border-color:var(--accent)}
+#setup-go{margin-top:6px}
+#setup-status{margin-top:16px;font-size:14px;line-height:1.55;text-align:center;min-height:20px}
+#setup-status.ok{color:var(--green)}
+#setup-status.bad{color:var(--red)}
+#setup-status.wait{color:var(--text2)}
+#setup-forget{margin-top:26px}
+
+/* значок синхронизации */
+#sync-btn.busy{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#sync-btn.bad{color:var(--amber)}
+
+/* ── filter chips ──────────────────────────────── */
+#chips{
+  flex-shrink:0;display:flex;gap:8px;padding:12px;overflow-x:auto;
+  border-bottom:1px solid var(--border);scrollbar-width:none;
+}
+#chips::-webkit-scrollbar{display:none}
+.chip{
+  flex-shrink:0;padding:8px 15px;border-radius:100px;font-size:14px;font-weight:500;
+  background:var(--bg2);border:1px solid var(--border);color:var(--text2);
+}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ── topic list ────────────────────────────────── */
+#tree{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:8px 12px calc(var(--safeB) + 24px)}
+.row{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:8px;overflow:hidden;
+}
+.row.sub{margin-left:16px;background:var(--bg)}
+.row-top{display:flex;align-items:stretch;gap:4px}
+.row-main{
+  flex:1;min-width:0;display:flex;align-items:center;gap:10px;
+  padding:15px 12px;text-align:left;background:transparent;
+}
+.row-main:active{background:var(--bg3)}
+.row-name{flex:1;min-width:0;font-size:16px;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.count{
+  flex-shrink:0;font-size:13px;font-weight:600;color:var(--text2);
+  background:var(--bg3);border-radius:100px;padding:3px 10px;min-width:34px;text-align:center;
+}
+.count.zero{opacity:.35}
+.caret{
+  width:44px;align-self:stretch;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text2);font-size:13px;border-left:1px solid var(--border);
+  transition:transform .18s;
+}
+.caret.open{transform:rotate(180deg)}
+.caret:active{background:var(--bg3)}
+.empty{text-align:center;color:var(--text2);padding:48px 24px;font-size:15px}
+
+/* строка «что загружено» + замена файла */
+#source{border-top:1px solid var(--border);margin-top:8px;padding-top:14px;text-align:center}
+.src-line{font-size:12.5px;color:var(--text2);opacity:.75;margin-bottom:10px;
+  word-break:break-word;padding:0 8px}
+.src-warn{font-size:12.5px;color:var(--amber);margin-bottom:10px;
+  line-height:1.5;padding:0 8px}
+.src-btn{font-size:14px;color:var(--text2);padding:10px 18px;border-radius:10px;
+  border:1px solid var(--border);background:var(--bg2)}
+.src-btn:active{background:var(--bg3)}
+
+/* progress bar under each topic */
+.row-bar{height:3px;background:var(--bg3)}
+.row-bar>i{display:block;height:100%;background:var(--green)}
+
+/* ── кнопка «учить» в строке темы ──────────────── */
+.play{
+  width:46px;align-self:stretch;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accentH);font-size:15px;border-left:1px solid var(--border);
+}
+.play:active{background:var(--bg3)}
+
+/* ── список карточек ───────────────────────────── */
+#search-wrap{
+  flex-shrink:0;position:relative;display:flex;align-items:center;
+  padding:10px 12px;border-bottom:1px solid var(--border);
+}
+#search-icon{position:absolute;left:24px;font-size:14px;opacity:.5;pointer-events:none}
+#search{
+  flex:1;width:100%;padding:12px 40px;border-radius:12px;
+  background:var(--bg2);border:1px solid var(--border);color:var(--text);
+  font-size:16px;outline:none;-webkit-appearance:none;
+}
+#search:focus{border-color:var(--accent)}
+#search::-webkit-search-cancel-button{display:none}
+#search-clear{
+  position:absolute;right:20px;width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text2);font-size:15px;background:var(--bg3);
+}
+#cards{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:8px 12px calc(var(--safeB) + 24px)}
+.card-row{
+  display:flex;align-items:flex-start;gap:11px;width:100%;text-align:left;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;padding:13px 12px;margin-bottom:7px;
+}
+.card-row:active{background:var(--bg3)}
+.card-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:7px}
+.card-txt{flex:1;min-width:0}
+.card-q{
+  font-size:15.5px;line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;word-break:break-word;
+}
+.card-meta{font-size:11.5px;color:var(--text2);margin-top:5px;opacity:.8}
+.card-star{flex-shrink:0;color:var(--amber);font-size:15px;margin-top:3px}
+.hl{background:rgba(99,102,241,.35);border-radius:3px}
+#list-count{
+  text-align:center;color:var(--text2);font-size:13px;padding:12px 0 4px;
+}
+
+/* ── study ─────────────────────────────────────── */
+#s-bar{
+  flex-shrink:0;background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:calc(var(--safeT) + 8px) 8px 0;
+}
+#s-bar-top{display:flex;align-items:center;gap:8px;padding-bottom:8px}
+#s-title{flex:1;min-width:0;font-size:14px;color:var(--text2);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#s-count{font-size:14px;font-weight:600;color:var(--text2);
+  font-variant-numeric:tabular-nums;padding-right:4px}
+#s-track{height:3px;background:var(--bg3)}
+#s-fill{height:100%;background:var(--accent);transition:width .25s}
+
+#s-body{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:20px 18px 28px;
+}
+.label{
+  font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--text2);margin-bottom:12px;
+}
+.mrow{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+.mdots{display:inline-flex;gap:4px}
+.mdot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.mlabel{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+.star{margin-left:auto;font-size:22px;padding:6px 10px;border-radius:10px;color:var(--text2)}
+.star.on{color:var(--amber)}
+.star:active{background:var(--bg3)}
+
+#answer{margin-top:26px;padding-top:22px;border-top:1px solid var(--border)}
+.tap-hint{
+  margin-top:30px;text-align:center;color:var(--text2);
+  font-size:14px;opacity:.55;
+}
+
+/* content blocks */
+.blk{margin-bottom:16px}
+.blk:last-child{margin-bottom:0}
+.b-text{white-space:pre-wrap;word-wrap:break-word;font-size:17px;line-height:1.65}
+.b-rich{word-wrap:break-word;font-size:17px;line-height:1.65}
+.b-rich ul,.b-rich ol{padding-left:24px;margin:8px 0}
+.b-rich li{margin-bottom:5px}
+.b-rich b,.b-rich strong{font-weight:700;color:#fff}
+.b-rich blockquote{border-left:3px solid var(--border);padding-left:12px;color:var(--text2)}
+.b-rich code{background:var(--bg3);padding:2px 6px;border-radius:4px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px}
+.b-code{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.b-code pre{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:13px}
+.b-code code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13.5px;line-height:1.55;background:none!important;padding:0}
+.b-math{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:6px 0;text-align:center}
+.b-math .katex-display{margin:0}
+.b-img{display:block;max-width:100%;border-radius:10px}
+.b-img.inverted{filter:invert(1) hue-rotate(180deg)}
+.b-img.img-loading{min-height:120px;background:var(--bg2);
+  border:1px solid var(--border);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:.8}}
+.img-miss{
+  padding:14px;border:1px dashed var(--border);border-radius:10px;
+  color:var(--text2);font-size:14px;text-align:center;
+}
+.katex{font-size:1.04em}
+.katex-display>.katex{white-space:normal}
+
+/* ── study footer ──────────────────────────────── */
+#s-foot{
+  flex-shrink:0;background:var(--bg2);border-top:1px solid var(--border);
+  padding:12px 12px calc(var(--safeB) + 12px);
+}
+#reveal{
+  width:100%;padding:17px;border-radius:14px;
+  background:var(--accent);color:#fff;font-size:17px;font-weight:600;
+}
+#reveal:active{background:var(--accentH)}
+#rates{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rate{
+  padding:15px 8px;border-radius:12px;font-size:15px;font-weight:600;
+  background:var(--bg3);border:1px solid var(--border);
+}
+.rate:active{filter:brightness(1.4)}
+.rate.again{color:var(--red);border-color:#4a2530}
+.rate.hard {color:var(--amber);border-color:#4a3a20}
+.rate.good {color:var(--green);border-color:#1f4030}
+.rate.easy {color:var(--accentH);border-color:#33345c}
+#nav-row{display:flex;gap:8px;margin-top:8px}
+#nav-row button{
+  flex:1;padding:11px;border-radius:10px;font-size:14px;
+  color:var(--text2);background:var(--bg3);border:1px solid var(--border);
+}
+#nav-row button:disabled{opacity:.3}
+
+/* ── done ──────────────────────────────────────── */
+#done{align-items:center;justify-content:center;padding:32px 24px;gap:14px;text-align:center}
+#done .big{font-size:56px}
+#done h2{font-size:24px;font-weight:700}
+#done p{color:var(--text2);font-size:15px}
+
+/* ── toast ─────────────────────────────────────── */
+#toast{
+  position:fixed;left:50%;transform:translateX(-50%) translateY(20px);
+  bottom:calc(var(--safeB) + 100px);z-index:99;
+  background:var(--bg3);border:1px solid var(--border);
+  padding:11px 20px;border-radius:100px;font-size:14px;font-weight:500;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+  max-width:88vw;text-align:center;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ══ LOAD ══ -->
+<div class="screen" id="load">
+  <div class="logo">🗂️</div>
+  <h1 id="load-title">Cards</h1>
+  <p>Выберите файл <b>data.json</b> из папки с карточками. Он сохранится в памяти телефона — дальше приложение будет открываться сразу, без выбора файла и без интернета.</p>
+  <div id="load-current"></div>
+  <button class="btn-big" onclick="openSetup()">Подключить GitHub</button>
+  <label class="btn-ghost-big" style="display:block;text-align:center">
+    Выбрать файл вручную
+    <input type="file" id="file-in" accept=".json,application/json" hidden>
+  </label>
+  <button class="btn-ghost-big" id="load-demo" onclick="loadDemo()">Посмотреть на демо-карточках</button>
+  <button class="btn-ghost-big hidden" id="load-cancel" onclick="cancelLoad()">Отмена</button>
+  <p id="load-err" style="color:var(--red);display:none"></p>
+</div>
+
+<!-- ══ SETUP: подключение репозитория ══ -->
+<div class="screen hidden" id="setup">
+  <div class="topbar">
+    <button class="icon-btn" onclick="closeSetup()">←</button>
+    <h1>Подключение</h1>
+  </div>
+  <div id="setup-body">
+    <p class="setup-hint">Карточки берутся из вашего приватного репозитория. Данные для подключения сохранятся на телефоне — вводить их каждый раз не нужно.</p>
+
+    <label class="fld">
+      <span>Владелец (ваш логин на GitHub)</span>
+      <input id="f-owner" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="username">
+    </label>
+    <label class="fld">
+      <span>Репозиторий с карточками</span>
+      <input id="f-repo" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="cards-data">
+    </label>
+    <label class="fld">
+      <span>Ветка</span>
+      <input id="f-branch" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="main">
+    </label>
+    <label class="fld">
+      <span>Токен доступа (только чтение)</span>
+      <input id="f-token" type="password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="github_pat_…">
+    </label>
+
+    <button class="btn-big" id="setup-go" onclick="connectGH()">Проверить и подключить</button>
+    <div id="setup-status"></div>
+    <button class="btn-ghost-big hidden" id="setup-forget" onclick="forgetGH()">Отключить репозиторий</button>
+  </div>
+</div>
+
+<!-- ══ HOME ══ -->
+<div class="screen hidden" id="home">
+  <div class="topbar">
+    <h1>Карточки</h1>
+    <button class="icon-btn" id="sync-btn" onclick="syncNow(true)" title="Обновить карточки">⟳</button>
+    <button class="icon-btn" onclick="openList('*')" title="Все карточки и поиск">🔍</button>
+    <button class="icon-btn" onclick="startAll()" title="Учить всё">▶</button>
+  </div>
+  <div id="chips"></div>
+  <div id="tree"></div>
+</div>
+
+<!-- ══ CARD LIST ══ -->
+<div class="screen hidden" id="list">
+  <div class="topbar">
+    <button class="icon-btn" onclick="goHome()">←</button>
+    <h1 id="list-title"></h1>
+    <button class="icon-btn" onclick="studyList()" title="Учить эти карточки">▶</button>
+  </div>
+  <div id="search-wrap">
+    <span id="search-icon">🔍</span>
+    <input id="search" type="search" placeholder="Поиск по карточкам"
+           autocomplete="off" autocorrect="off" spellcheck="false">
+    <button id="search-clear" class="hidden" onclick="clearSearch()">✕</button>
+  </div>
+  <div id="cards"></div>
+</div>
+
+<!-- ══ STUDY ══ -->
+<div class="screen hidden" id="study">
+  <div id="s-bar">
+    <div id="s-bar-top">
+      <button class="icon-btn" onclick="goBack()">←</button>
+      <div id="s-title"></div>
+      <div id="s-count"></div>
+    </div>
+    <div id="s-track"><div id="s-fill" style="width:0"></div></div>
+  </div>
+  <div id="s-body"></div>
+  <div id="s-foot"></div>
+</div>
+
+<!-- ══ DONE ══ -->
+<div class="screen hidden" id="done">
+  <div class="big">🎉</div>
+  <h2>Колода пройдена</h2>
+  <p id="done-stats"></p>
+  <button class="btn-big" onclick="restart()">Пройти ещё раз</button>
+  <button class="btn-ghost-big" onclick="goHome()">К темам</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const DEMO = {"topics":{"ml":{"id":"ml","name":"Machine Learning","parentId":null,"children":["ml-lin","ml-tree","ml-met"],"cards":[]},"ml-lin":{"id":"ml-lin","name":"Линейные модели","parentId":"ml","children":[],"cards":["c1","c2","c3","c4"]},"ml-tree":{"id":"ml-tree","name":"Деревья и ансамбли","parentId":"ml","children":[],"cards":["c5","c6","c7"]},"ml-met":{"id":"ml-met","name":"Метрики","parentId":"ml","children":[],"cards":["c8","c9","c10"]},"math":{"id":"math","name":"Математика","parentId":null,"children":["math-la","math-prob"],"cards":[]},"math-la":{"id":"math-la","name":"Линейная алгебра","parentId":"math","children":[],"cards":["c11","c12","c13"]},"math-prob":{"id":"math-prob","name":"Теория вероятностей","parentId":"math","children":[],"cards":["c14","c15","c16"]},"py":{"id":"py","name":"Python","parentId":null,"children":[],"cards":["c17","c18","c19","c20"]}},"cards":{"c1":{"id":"c1","topicId":"ml-lin","front":[{"type":"text","value":"Запишите функцию потерь линейной регрессии методом наименьших квадратов."}],"back":[{"type":"text","value":"Среднеквадратичная ошибка (MSE):"},{"type":"math","value":"L(w) = \\frac{1}{n}\\sum_{i=1}^{n}\\left(y_i - w^\\top x_i\\right)^2"},{"type":"text","value":"Аналитическое решение — нормальное уравнение:"},{"type":"math","value":"\\hat{w} = (X^\\top X)^{-1} X^\\top y"}],"mastery":3,"star":false},"c2":{"id":"c2","topicId":"ml-lin","front":[{"type":"text","value":"В чём разница между L1- и L2-регуляризацией?"}],"back":[{"type":"text","value":"<b>L1 (Lasso)<\/b> добавляет $\\lambda\\sum|w_j|$ — зануляет веса, даёт разреженное решение и по сути отбирает признаки.<br><b>L2 (Ridge)<\/b> добавляет $\\lambda\\sum w_j^2$ — сжимает веса к нулю, но не зануляет их; хорошо справляется с мультиколлинеарностью.","rich":true},{"type":"code","value":"from sklearn.linear_model import Lasso, Ridge\n\nlasso = Lasso(alpha=0.1)   # L1\nridge = Ridge(alpha=1.0)   # L2","lang":"python"}],"mastery":2,"star":true},"c3":{"id":"c3","topicId":"ml-lin","front":[{"type":"text","value":"Почему для логистической регрессии не используют MSE?"}],"back":[{"type":"text","value":"С сигмоидой MSE становится невыпуклой — градиентный спуск застревает в локальных минимумах. Log-loss выпукла:"},{"type":"math","value":"L = -\\frac{1}{n}\\sum_{i=1}^{n}\\Big[y_i\\log \\hat{p}_i + (1-y_i)\\log(1-\\hat{p}_i)\\Big]"}],"mastery":1,"star":false},"c4":{"id":"c4","topicId":"ml-lin","front":[{"type":"text","value":"Что такое мультиколлинеарность и чем она вредна?"}],"back":[{"type":"text","value":"Сильная линейная зависимость между признаками. $X^\\top X$ становится плохо обусловленной, оценки весов приобретают огромную дисперсию: коэффициенты скачут от небольших изменений в данных и теряют интерпретируемость. Лечится L2, PCA или удалением признаков (VIF > 10)."}],"mastery":0,"star":false},"c5":{"id":"c5","topicId":"ml-tree","front":[{"type":"text","value":"Что такое энтропия и прирост информации в дереве решений?"}],"back":[{"type":"math","value":"H(S) = -\\sum_{i=1}^{c} p_i \\log_2 p_i"},{"type":"text","value":"Прирост информации от разбиения по признаку A:"},{"type":"math","value":"IG(S, A) = H(S) - \\sum_{v \\in A} \\frac{|S_v|}{|S|} H(S_v)"},{"type":"text","value":"Дерево на каждом шаге жадно выбирает разбиение с максимальным IG."}],"mastery":4,"star":false},"c6":{"id":"c6","topicId":"ml-tree","front":[{"type":"text","value":"Чем бэггинг отличается от бустинга?"}],"back":[{"type":"text","value":"<b>Бэггинг<\/b> — модели учатся <i>параллельно<\/i> и независимо на бутстрап-выборках, предсказания усредняются. Снижает <b>дисперсию<\/b>. Пример: Random Forest.<br><br><b>Бустинг<\/b> — модели учатся <i>последовательно<\/i>, каждая следующая исправляет ошибки предыдущих. Снижает <b>смещение<\/b>. Пример: XGBoost, CatBoost.","rich":true}],"mastery":2,"star":true},"c7":{"id":"c7","topicId":"ml-tree","front":[{"type":"text","value":"Как Random Forest декоррелирует деревья?"}],"back":[{"type":"text","value":"Двумя источниками случайности: бутстрап-выборка объектов и случайное подмножество признаков в каждом узле (обычно $\\sqrt{p}$ для классификации, $p/3$ для регрессии). Без второго все деревья хватались бы за один и тот же сильный признак и были бы почти одинаковыми."},{"type":"code","value":"RandomForestClassifier(\n    n_estimators=500,\n    max_features='sqrt',\n    bootstrap=True,\n)","lang":"python"}],"mastery":1,"star":false},"c8":{"id":"c8","topicId":"ml-met","front":[{"type":"text","value":"Точность (precision) и полнота (recall) — формулы и когда что важнее."}],"back":[{"type":"math","value":"\\text{Precision} = \\frac{TP}{TP + FP} \\qquad \\text{Recall} = \\frac{TP}{TP + FN}"},{"type":"text","value":"<b>Precision<\/b> важнее, когда дорога ложная тревога (спам-фильтр отправил важное письмо в спам).<br><b>Recall<\/b> важнее, когда дорог пропуск (скрининг на онкологию, поиск мошенничества).","rich":true}],"mastery":5,"star":false},"c9":{"id":"c9","topicId":"ml-met","front":[{"type":"text","value":"Что показывает ROC-AUC и в чём его слабое место?"}],"back":[{"type":"text","value":"Вероятность того, что случайно взятый положительный объект получит больший скор, чем случайно взятый отрицательный. AUC = 0.5 — случайное угадывание."},{"type":"text","value":"Слабое место: при сильном дисбалансе классов ROC-AUC выглядит оптимистично, потому что FPR нормируется на большое число негативов. В таких задачах честнее PR-AUC."}],"mastery":3,"star":false},"c10":{"id":"c10","topicId":"ml-met","front":[{"type":"text","value":"Запишите F1-меру и объясните, почему берут гармоническое среднее."}],"back":[{"type":"math","value":"F_1 = 2 \\cdot \\frac{\\text{Precision} \\cdot \\text{Recall}}{\\text{Precision} + \\text{Recall}}"},{"type":"text","value":"Гармоническое среднее сильно штрафует дисбаланс: при precision = 1.0 и recall = 0.0 арифметическое дало бы 0.5, а F1 даёт 0. Хорошая оценка требует, чтобы обе величины были высокими."}],"mastery":2,"star":false},"c11":{"id":"c11","topicId":"math-la","front":[{"type":"text","value":"Определение собственного вектора и собственного значения."}],"back":[{"type":"text","value":"Вектор $v \\neq 0$ — собственный для матрицы $A$, если преобразование только растягивает его, не поворачивая:"},{"type":"math","value":"Av = \\lambda v"},{"type":"text","value":"Собственные значения находят из характеристического уравнения:"},{"type":"math","value":"\\det(A - \\lambda I) = 0"}],"mastery":3,"star":true},"c12":{"id":"c12","topicId":"math-la","front":[{"type":"text","value":"Что делает сингулярное разложение (SVD)?"}],"back":[{"type":"text","value":"Раскладывает любую матрицу $m \\times n$ на три:"},{"type":"math","value":"A = U \\Sigma V^\\top"},{"type":"text","value":"$U$ и $V$ ортогональны, $\\Sigma$ диагональна с неотрицательными сингулярными числами. Геометрически: <b>поворот → растяжение по осям → поворот<\/b>. Оставив $k$ наибольших сингулярных чисел, получаем лучшее приближение ранга $k$ — это основа PCA и сжатия.","rich":true}],"mastery":1,"star":false},"c13":{"id":"c13","topicId":"math-la","front":[{"type":"text","value":"Чему равен след матрицы и какое у него полезное свойство?"}],"back":[{"type":"text","value":"Сумма диагональных элементов. Свойства:"},{"type":"math","value":"\\operatorname{tr}(A) = \\sum_i \\lambda_i \\qquad \\operatorname{tr}(AB) = \\operatorname{tr}(BA)"},{"type":"text","value":"Второе равенство работает даже когда $AB$ и $BA$ разного размера — постоянно используется при выводе градиентов."}],"mastery":0,"star":false},"c14":{"id":"c14","topicId":"math-prob","front":[{"type":"text","value":"Формула Байеса и названия всех её частей."}],"back":[{"type":"math","value":"P(A \\mid B) = \\frac{P(B \\mid A)\\, P(A)}{P(B)}"},{"type":"text","value":"$P(A)$ — априорная вероятность, $P(B \\mid A)$ — правдоподобие, $P(B)$ — нормировка (маргинальная вероятность), $P(A \\mid B)$ — апостериорная вероятность."}],"mastery":4,"star":false},"c15":{"id":"c15","topicId":"math-prob","front":[{"type":"text","value":"Сформулируйте центральную предельную теорему."}],"back":[{"type":"text","value":"Сумма большого числа независимых одинаково распределённых величин с конечной дисперсией распределена приблизительно нормально — независимо от исходного распределения:"},{"type":"math","value":"\\frac{\\bar{X}_n - \\mu}{\\sigma / \\sqrt{n}} \\xrightarrow{d} \\mathcal{N}(0, 1)"},{"type":"text","value":"Именно поэтому доверительные интервалы для среднего работают почти всегда."}],"mastery":2,"star":false},"c16":{"id":"c16","topicId":"math-prob","front":[{"type":"text","value":"Разложение ошибки на смещение и дисперсию."}],"back":[{"type":"math","value":"\\mathbb{E}\\big[(y - \\hat{f}(x))^2\\big] = \\underbrace{\\text{Bias}^2}_{\\text{недообучение}} + \\underbrace{\\text{Var}}_{\\text{переобучение}} + \\underbrace{\\sigma^2}_{\\text{шум}}"},{"type":"text","value":"Простая модель — высокое смещение, низкая дисперсия. Сложная — наоборот. Неустранимый шум $\\sigma^2$ задаёт предел качества."}],"mastery":1,"star":true},"c17":{"id":"c17","topicId":"py","front":[{"type":"text","value":"Чем list comprehension отличается от генератора?"}],"back":[{"type":"code","value":"squares = [x**2 for x in range(10)]   # список: всё в памяти сразу\ngen     = (x**2 for x in range(10))   # генератор: ленивый, по одному\n\nsum(x**2 for x in range(10_000_000))  # без генератора съело бы ~400 МБ","lang":"python"},{"type":"text","value":"Генератор считает элементы по требованию и хранит только текущее состояние — обязателен для больших или бесконечных последовательностей."}],"mastery":3,"star":false},"c18":{"id":"c18","topicId":"py","front":[{"type":"text","value":"Почему изменяемый объект нельзя использовать как значение аргумента по умолчанию?"}],"back":[{"type":"code","value":"def bad(item, box=[]):      # ловушка\n    box.append(item)\n    return box\n\nbad(1)  # [1]\nbad(2)  # [1, 2] — тот же список!\n\ndef good(item, box=None):  # правильно\n    if box is None:\n        box = []\n    box.append(item)\n    return box","lang":"python"},{"type":"text","value":"Значение по умолчанию вычисляется один раз при определении функции, а не при каждом вызове."}],"mastery":2,"star":true},"c19":{"id":"c19","topicId":"py","front":[{"type":"text","value":"Что делает декоратор @property?"}],"back":[{"type":"code","value":"class Circle:\n    def __init__(self, r):\n        self._r = r\n\n    @property\n    def area(self):\n        return 3.14159 * self._r ** 2\n\nc = Circle(2)\nc.area      # 12.566 — вызывается как атрибут, без скобок","lang":"python"},{"type":"text","value":"Превращает метод в вычисляемый атрибут. Позволяет добавить логику к обращению к полю, не ломая существующий код."}],"mastery":0,"star":false},"c20":{"id":"c20","topicId":"py","front":[{"type":"text","value":"Объясните GIL одним абзацем."}],"back":[{"type":"text","value":"Global Interpreter Lock — мьютекс, из-за которого в один момент времени байт-код Python исполняет только <b>один<\/b> поток. Поэтому потоки не ускоряют CPU-задачи, но прекрасно работают для I/O (при ожидании сети GIL отпускается). Для параллельных вычислений нужен <code>multiprocessing<\/code> или библиотеки, отпускающие GIL — например NumPy.","rich":true}],"mastery":4,"star":false}},"roots":["ml","math","py"],"sets":{"Собеседование по ML":{"filter":"all","entries":[{"topicId":"ml","exclude":[]},{"topicId":"math-prob","exclude":[]}]}},"studyProgress":{},"recentScopes":[]};
+// сборка «для примерки»: карточки уже внутри файла, открывается сразу на темах
+const AUTOLOAD = false;
+
+/* ═══════════════════ IndexedDB ═══════════════════
+   Две независимые записи:
+     data     — карточки, приезжают с компьютера, перезаписываются целиком
+     progress — прогресс изучения, живёт только на телефоне
+   Разделение принципиально: обновление карточек не должно стирать прогресс.
+*/
+const DB_NAME='cards-mobile', STORE='kv', LS='cards-mobile:';
+let useLS=false;      // IndexedDB недоступна (например, открыто как file://)
+let noStore=false;    // не работает вообще ничего — предупредим пользователя
+
+function openDB(){
+  return new Promise((res,rej)=>{
+    let r;
+    try{ r=indexedDB.open(DB_NAME,1); }catch(e){ return rej(e); }
+    r.onupgradeneeded=e=>e.target.result.createObjectStore(STORE);
+    r.onsuccess=e=>res(e.target.result);
+    r.onerror=()=>rej(r.error);
+    r.onblocked=()=>rej(new Error('blocked'));
+  });
+}
+function lsGet(k){
+  try{ const v=localStorage.getItem(LS+k); return v?JSON.parse(v):null; }
+  catch(_){ return null; }
+}
+function lsPut(k,v){
+  try{ localStorage.setItem(LS+k,JSON.stringify(v)); return true; }
+  catch(_){ noStore=true; return false; }
+}
+async function kvGet(k){
+  if(!useLS){
+    try{
+      const d=await openDB();
+      return await new Promise((res,rej)=>{
+        const rq=d.transaction(STORE,'readonly').objectStore(STORE).get(k);
+        rq.onsuccess=()=>res(rq.result??null);
+        rq.onerror=()=>rej(rq.error);
+      });
+    }catch(_){ useLS=true; }   // один раз падаем на localStorage и больше не пробуем
+  }
+  return lsGet(k);
+}
+async function kvPut(k,v){
+  if(!useLS){
+    try{
+      const d=await openDB();
+      await new Promise((res,rej)=>{
+        const tx=d.transaction(STORE,'readwrite');
+        tx.objectStore(STORE).put(v,k);
+        tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); tx.onabort=()=>rej(tx.error);
+      });
+      return true;
+    }catch(_){ useLS=true; }
+  }
+  return lsPut(k,v);
+}
+
+/* ═══════════════════ состояние ═══════════════════ */
+let db=null;
+let meta=null;   // {name, count, at} — что именно загружено и когда
+let prog={mastery:{},star:{},session:null};
+let st={scope:null,scopeName:'',filter:'all',queue:[],idx:0,revealed:false,open:{},
+        listScope:null,listIds:[],query:'',from:'home'};
+let saveT=null;
+
+const MLABEL=['Новая','Изучаю','Изучаю','Повторяю','Повторяю','Выучена'];
+const MCOLOR=['#475569','#ef4444','#f59e0b','#f59e0b','#22c55e','#6366f1'];
+
+function mastery(c){ const v=prog.mastery[c.id]; return v===undefined?(c.mastery||0):v; }
+function starred(c){ const v=prog.star[c.id];   return v===undefined?!!c.star:v; }
+
+function saveProg(){
+  clearTimeout(saveT);
+  saveT=setTimeout(()=>kvPut('progress',prog),350);
+}
+
+/* ═══════════════════ утилиты ═══════════════════ */
+function esc(s){
+  return String(s??'').replace(/[&<>"']/g,m=>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+const RT_OK=new Set(['B','STRONG','I','EM','U','UL','OL','LI','BR','DIV','SPAN','P','FONT','BLOCKQUOTE','CODE']);
+function sanitize(html){
+  const root=document.createElement('div');
+  root.innerHTML=html||'';
+  (function clean(node){
+    [...node.childNodes].forEach(ch=>{
+      if(ch.nodeType===1){
+        if(!RT_OK.has(ch.tagName)){
+          while(ch.firstChild) node.insertBefore(ch.firstChild,ch);
+          node.removeChild(ch); return;
+        }
+        [...ch.attributes].forEach(a=>{
+          if(a.name==='style'){
+            const keep=[];
+            if(ch.style.color) keep.push('color:'+ch.style.color);
+            if(ch.style.marginLeft) keep.push('margin-left:'+ch.style.marginLeft);
+            keep.length?ch.setAttribute('style',keep.join(';')):ch.removeAttribute('style');
+          } else if(!(a.name==='color'&&ch.tagName==='FONT')){
+            ch.removeAttribute(a.name);
+          }
+        });
+        clean(ch);
+      } else if(ch.nodeType!==3){ node.removeChild(ch); }
+    });
+  })(root);
+  return root.innerHTML;
+}
+function looksRich(v){
+  return /<\/?(ul|ol|li|b|strong|i|em|u|span|div|p|br|font|blockquote|code)[\s>]/i.test(v||'');
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1600);
+}
+
+/* ═══════════════════ рендер блоков ═══════════════════ */
+const MATH_DELIMS=[
+  {left:'$$',right:'$$',display:true},
+  {left:'\\[',right:'\\]',display:true},
+  {left:'\\(',right:'\\)',display:false},
+  {left:'$',right:'$',display:false}
+];
+function toBlocks(side){
+  if(!side) return [];
+  return Array.isArray(side)?side:[side];
+}
+function mathHTML(tex,display){
+  if(typeof katex==='undefined') return esc(tex||'');
+  try{
+    return katex.renderToString(tex||'',{displayMode:display,throwOnError:false,
+      errorColor:'#ef4444',output:'html'});
+  }catch(e){ return '<span style="color:var(--red)">LaTeX: '+esc(e.message)+'</span>'; }
+}
+function blocksHTML(side){
+  return toBlocks(side).map(b=>{
+    if(b.type==='text'){
+      const v=b.value||'';
+      if(!v.trim()) return '';
+      return (b.rich||looksRich(v))
+        ? '<div class="blk b-rich">'+sanitize(v)+'</div>'
+        : '<div class="blk b-text">'+esc(v)+'</div>';
+    }
+    if(b.type==='code')
+      return '<div class="blk b-code"><pre><code class="language-'+esc(b.lang||'plaintext')+
+             '">'+esc(b.value||'')+'</code></pre></div>';
+    if(b.type==='math')
+      return '<div class="blk b-math">'+mathHTML(b.value||'',true)+'</div>';
+    if(b.type==='image'&&b.value){
+      const cached=imgURLs.get(b.value);
+      return '<div class="blk img-wrap"><img class="b-img'+(b.inverted?' inverted':'')+
+             (cached?'':' img-loading')+'" data-img="'+esc(b.value)+'"'+
+             (cached?' src="'+cached+'"':'')+' alt=""></div>';
+    }
+    return '';
+  }).join('');
+}
+function enhance(root){
+  loadImages(root);
+  root.querySelectorAll('pre code').forEach(el=>{
+    try{ hljs.highlightElement(el); }catch(_){}
+  });
+  // формулы внутри текстовых блоков ($...$), но не внутри кода
+  root.querySelectorAll('.b-text,.b-rich').forEach(el=>{
+    if(typeof renderMathInElement==='undefined') return;
+    try{
+      renderMathInElement(el,{delimiters:MATH_DELIMS,throwOnError:false,
+        errorColor:'#ef4444',ignoredTags:['script','noscript','style','textarea','pre','code']});
+    }catch(_){}
+  });
+}
+
+/* ═══════════════════ выборка карточек ═══════════════════ */
+function descendants(tid){
+  const out=[tid], t=db.topics[tid];
+  (t?.children||[]).forEach(c=>out.push(...descendants(c)));
+  return out;
+}
+function cardsOf(tid){
+  const ids=new Set(descendants(tid));
+  return Object.values(db.cards).filter(c=>ids.has(c.topicId));
+}
+const FILTERS={
+  all:   {label:'Все',      test:()=>true},
+  new:   {label:'Новые',    test:c=>!mastery(c)},
+  weak:  {label:'Сложные',  test:c=>mastery(c)<=1},
+  star:  {label:'Важные',   test:c=>starred(c)},
+  todo:  {label:'Не выучены',test:c=>mastery(c)<5}
+};
+function applyFilter(list){ return list.filter(FILTERS[st.filter].test); }
+
+/* ═══════════════════ экраны ═══════════════════ */
+function show(id){
+  ['load','setup','home','list','study','done'].forEach(s=>
+    document.getElementById(s).classList.toggle('hidden',s!==id));
+}
+function goHome(){
+  if(st.queue.length) saveSession();
+  show('home'); renderChips(); renderTree();
+}
+/* «←» на экране изучения возвращает туда, откуда пришли */
+function goBack(){
+  if(st.queue.length) saveSession();
+  if(st.from==='list'&&st.listScope){ show('list'); renderList(); }
+  else goHome();
+}
+function reload(){ show('load'); }
+
+/* ── список тем ── */
+function renderChips(){
+  document.getElementById('chips').innerHTML=
+    Object.entries(FILTERS).map(([k,f])=>
+      '<button class="chip'+(st.filter===k?' on':'')+'" onclick="setFilter(\''+k+'\')">'+
+      f.label+'</button>').join('');
+}
+function setFilter(k){ st.filter=k; renderChips(); renderTree(); }
+
+function topicRow(tid,depth){
+  const t=db.topics[tid]; if(!t) return '';
+  const all=cardsOf(tid);
+  const n=applyFilter(all).length;
+  const done=all.filter(c=>mastery(c)>=5).length;
+  const pct=all.length?Math.round(done/all.length*100):0;
+  const kids=t.children||[];
+  const open=!!st.open[tid];
+  let h='<div class="row'+(depth?' sub':'')+'">'+
+    '<div class="row-top">'+
+      '<button class="row-main" onclick="openList(\''+tid+'\')">'+
+        '<span class="row-name">'+esc(t.name)+'</span>'+
+        '<span class="count'+(n?'':' zero')+'">'+n+'</span>'+
+      '</button>'+
+      '<button class="play" onclick="start(\''+tid+'\',event)" title="Учить">▶</button>'+
+      (kids.length?'<button class="caret'+(open?' open':'')+
+        '" onclick="toggle(\''+tid+'\')">⌄</button>':'')+
+    '</div>'+
+    '<div class="row-bar"><i style="width:'+pct+'%"></i></div>'+
+  '</div>';
+  if(open) h+=kids.map(k=>topicRow(k,depth+1)).join('');
+  return h;
+}
+function toggle(tid){ st.open[tid]=!st.open[tid]; renderTree(); }
+
+function renderTree(){
+  const el=document.getElementById('tree');
+  if(!db||!db.roots?.length){ el.innerHTML='<div class="empty">Пока нет тем</div>'; return; }
+  const total=applyFilter(Object.values(db.cards)).length;
+  el.innerHTML=
+    db.roots.map(r=>topicRow(r,0)).join('')+
+    '<div style="text-align:center;color:var(--text2);font-size:13px;padding:14px 0 4px">'+
+      'Всего по фильтру: '+total+'</div>'+
+    '<div id="source">'+
+      (meta
+        ? '<div class="src-line">'+esc(meta.name)+' · '+meta.count+' карт.'+
+          (meta.at?' · обновлено '+fmtDate(meta.at):'')+'</div>'
+        : '')+
+      (sync.err
+        ? '<div class="src-warn">⚠ '+esc(sync.err)+'</div>'
+        : '')+
+      (noStore
+        ? '<div class="src-warn">⚠ Браузер не даёт сохранить карточки — при следующем открытии их придётся загрузить заново</div>'
+        : '')+
+      (cfg
+        ? '<button class="src-btn" onclick="openSetup()">Настройки подключения</button>'
+        : '<button class="src-btn" onclick="reload()">Источник карточек</button>')+
+    '</div>';
+}
+
+/* ═══════════════════ список карточек ═══════════════════ */
+
+/* Плоский текст карточки — для превью в списке и для поиска.
+   Формулы и код тоже попадают в текст: искать по \sum или по имени функции
+   так же естественно, как по словам. */
+const plainCache=new Map();
+function stripTags(html){
+  const d=document.createElement('div');
+  d.innerHTML=html||'';
+  return d.textContent||'';
+}
+function sideText(side){
+  return toBlocks(side).map(b=>{
+    const v=b.value||'';
+    if(b.type==='text') return (b.rich||looksRich(v))?stripTags(v):v;
+    if(b.type==='code'||b.type==='math') return v;
+    return '';
+  }).join(' ').replace(/\s+/g,' ').trim();
+}
+function cardText(c){
+  let t=plainCache.get(c.id);
+  if(t===undefined){
+    t={q:sideText(c.front),a:sideText(c.back)};
+    t.all=(t.q+' '+t.a).toLowerCase();
+    plainCache.set(c.id,t);
+  }
+  return t;
+}
+
+/* Порядок как в дереве: тема за темой, внутри темы — как на компьютере. */
+function orderedCards(tid){
+  const out=[];
+  if(tid==='*'){
+    db.roots.forEach(r=>out.push(...orderedCards(r)));
+  } else {
+    const t=db.topics[tid];
+    if(!t) return out;
+    (t.cards||[]).forEach(id=>{ if(db.cards[id]) out.push(db.cards[id]); });
+    (t.children||[]).forEach(k=>out.push(...orderedCards(k)));
+  }
+  // карточки, которых нет в списках тем (на случай рассинхрона данных)
+  if(tid==='*'){
+    const seen=new Set(out.map(c=>c.id));
+    Object.values(db.cards).forEach(c=>{ if(!seen.has(c.id)) out.push(c); });
+  }
+  return out;
+}
+
+function openList(tid){
+  st.listScope=tid;
+  st.scopeName=tid==='*'?'Все карточки':(db.topics[tid]?.name||'Карточки');
+  st.query='';
+  document.getElementById('list-title').textContent=st.scopeName;
+  const inp=document.getElementById('search');
+  inp.value='';
+  document.getElementById('search-clear').classList.add('hidden');
+  show('list');
+  renderList();
+}
+
+function currentList(){
+  let list=applyFilter(orderedCards(st.listScope));
+  const q=st.query.trim().toLowerCase();
+  if(q) list=list.filter(c=>cardText(c).all.includes(q));
+  return list;
+}
+
+function markHits(text,q){
+  if(!q) return esc(text);
+  const low=text.toLowerCase();
+  let out='',i=0;
+  while(true){
+    const j=low.indexOf(q,i);
+    if(j<0){ out+=esc(text.slice(i)); break; }
+    out+=esc(text.slice(i,j))+'<span class="hl">'+esc(text.slice(j,j+q.length))+'</span>';
+    i=j+q.length;
+  }
+  return out;
+}
+
+function renderList(){
+  const el=document.getElementById('cards');
+  const list=currentList();
+  const q=st.query.trim().toLowerCase();
+  st.listIds=list.map(c=>c.id);
+
+  if(!list.length){
+    el.innerHTML='<div class="empty">'+
+      (q?'Ничего не найдено':'Здесь пока нет карточек по этому фильтру')+'</div>';
+    return;
+  }
+  el.innerHTML=list.map((c,i)=>{
+    const m=Math.max(0,Math.min(5,mastery(c)));
+    const t=cardText(c);
+    // если совпадение только в ответе — показываем кусок ответа, иначе вопрос
+    const inQ=q&&t.q.toLowerCase().includes(q);
+    const body=(!q||inQ)?t.q:t.a;
+    let snippet=body;
+    if(q&&!inQ){
+      const p=body.toLowerCase().indexOf(q);
+      const from=Math.max(0,p-40);
+      snippet=(from?'…':'')+body.slice(from,from+160);
+    }
+    return '<button class="card-row" onclick="openCard('+i+')">'+
+      '<span class="card-dot" style="background:'+MCOLOR[m]+'"></span>'+
+      '<span class="card-txt">'+
+        '<span class="card-q">'+(markHits(snippet||'(пусто)',q)||'(пусто)')+'</span>'+
+        '<span class="card-meta">'+MLABEL[m]+(q&&!inQ?' · найдено в ответе':'')+'</span>'+
+      '</span>'+
+      (starred(c)?'<span class="card-star">★</span>':'')+
+    '</button>';
+  }).join('')+
+  '<div id="list-count">'+list.length+' '+plural(list.length,'карточка','карточки','карточек')+
+    (st.filter==='all'?'':' · фильтр «'+FILTERS[st.filter].label+'»')+'</div>';
+}
+
+function plural(n,one,few,many){
+  const a=Math.abs(n)%100, b=a%10;
+  if(a>10&&a<20) return many;
+  if(b>1&&b<5) return few;
+  if(b===1) return one;
+  return many;
+}
+
+let searchT=null;
+document.getElementById('search').addEventListener('input',e=>{
+  st.query=e.target.value;
+  document.getElementById('search-clear').classList.toggle('hidden',!st.query);
+  clearTimeout(searchT);
+  searchT=setTimeout(renderList,120);
+});
+function clearSearch(){
+  st.query='';
+  const inp=document.getElementById('search');
+  inp.value=''; inp.focus();
+  document.getElementById('search-clear').classList.add('hidden');
+  renderList();
+}
+
+/* Открыть конкретную карточку: очередь — то, что сейчас в списке,
+   в том же порядке, начиная с выбранной. */
+function openCard(i){
+  if(!st.listIds?.length) return;
+  st.scope=st.listScope; st.from='list';
+  st.queue=[...st.listIds]; st.idx=i; st.revealed=false;
+  document.getElementById('search').blur();
+  show('study'); renderCard();
+}
+/* «▶» в шапке списка — учить то, что сейчас отфильтровано, в обычном порядке очереди */
+function studyList(){
+  const list=currentList();
+  if(!list.length){ toast('Нет карточек для изучения'); return; }
+  st.scope=st.listScope; st.from='list';
+  st.queue=buildQueue(list); st.idx=0; st.revealed=false;
+  show('study'); renderCard();
+}
+
+/* ── запуск изучения ── */
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function buildQueue(list){
+  // сначала то, что знаешь хуже; внутри одного уровня — случайный порядок
+  const buckets=[[],[],[]];
+  list.forEach(c=>{
+    const m=mastery(c);
+    buckets[m<=1?0:m<=3?1:2].push(c.id);
+  });
+  return [...shuffle(buckets[0]),...shuffle(buckets[1]),...shuffle(buckets[2])];
+}
+function start(tid,ev){
+  if(ev) ev.stopPropagation();
+  const list=applyFilter(cardsOf(tid));
+  if(!list.length){ toast('В этой теме нет подходящих карточек'); return; }
+  st.scope=tid; st.scopeName=db.topics[tid].name; st.from='home';
+  st.queue=buildQueue(list); st.idx=0; st.revealed=false;
+  show('study'); renderCard();
+}
+function startAll(){
+  const list=applyFilter(Object.values(db.cards));
+  if(!list.length){ toast('Нет подходящих карточек'); return; }
+  st.scope='*'; st.scopeName='Все темы'; st.from='home';
+  st.queue=buildQueue(list); st.idx=0; st.revealed=false;
+  show('study'); renderCard();
+}
+function restart(){
+  if(st.from==='list') studyList();
+  else if(st.scope==='*') startAll();
+  else start(st.scope);
+}
+
+/* ── карточка ── */
+function renderCard(){
+  const total=st.queue.length;
+  const card=db.cards[st.queue[st.idx]];
+  if(!card){ finish(); return; }
+
+  document.getElementById('s-title').textContent=st.scopeName;
+  document.getElementById('s-count').textContent=(st.idx+1)+' / '+total;
+  document.getElementById('s-fill').style.width=(st.idx/total*100)+'%';
+
+  const m=Math.max(0,Math.min(5,mastery(card)));
+  const dots=Array.from({length:5},(_,i)=>
+    '<span class="mdot" style="background:'+(i<m?MCOLOR[m]:'var(--border)')+'"></span>').join('');
+  const on=starred(card);
+
+  const body=document.getElementById('s-body');
+  body.innerHTML=
+    '<div class="mrow">'+
+      '<span class="mlabel" style="color:'+MCOLOR[m]+'">'+MLABEL[m]+'</span>'+
+      '<span class="mdots">'+dots+'</span>'+
+      '<button class="star'+(on?' on':'')+'" onclick="toggleStar(event)">'+(on?'★':'☆')+'</button>'+
+    '</div>'+
+    '<div class="label">Вопрос</div>'+
+    '<div id="question">'+blocksHTML(card.front)+'</div>'+
+    (st.revealed
+      ? '<div id="answer"><div class="label">Ответ</div>'+blocksHTML(card.back)+'</div>'
+      : '<div class="tap-hint">нажмите, чтобы увидеть ответ</div>');
+  body.scrollTop=0;
+  enhance(body);
+
+  const foot=document.getElementById('s-foot');
+  foot.innerHTML=st.revealed
+    ? '<div id="rates">'+
+        '<button class="rate again" onclick="rate(0)">Не помню</button>'+
+        '<button class="rate hard"  onclick="rate(1)">С трудом</button>'+
+        '<button class="rate good"  onclick="rate(2)">Помню</button>'+
+        '<button class="rate easy"  onclick="rate(3)">Легко</button>'+
+      '</div>'
+    : '<button id="reveal" onclick="reveal()">Показать ответ</button>'+
+      '<div id="nav-row">'+
+        '<button onclick="prev()"'+(st.idx===0?' disabled':'')+'>← Назад</button>'+
+        '<button onclick="skip()">Пропустить →</button>'+
+      '</div>';
+  saveSession();
+}
+
+function reveal(){
+  if(st.revealed) return;
+  st.revealed=true; renderCard();
+}
+function toggleStar(e){
+  e.stopPropagation();
+  const card=db.cards[st.queue[st.idx]];
+  prog.star[card.id]=!starred(card);
+  saveProg(); renderCard();
+  toast(prog.star[card.id]?'★ Отмечено как важное':'Снята отметка');
+}
+function rate(r){
+  const card=db.cards[st.queue[st.idx]];
+  const prev=mastery(card);
+  let next=prev;
+  if(r===0){
+    next=Math.max(0,prev-1);
+    // вернуть карточку через несколько штук
+    st.queue.splice(Math.min(st.idx+4,st.queue.length),0,card.id);
+  } else if(r===2){ next=Math.min(5,prev+1); }
+  else if(r===3){ next=Math.min(5,prev+2); }
+  prog.mastery[card.id]=next;
+  saveProg();
+  if(r===0) toast('Вернём эту карточку чуть позже');
+  else if(next>=5&&prev<5) toast('⭐ Выучена');
+  advance();
+}
+function advance(){
+  st.revealed=false;
+  if(st.idx>=st.queue.length-1) finish();
+  else { st.idx++; renderCard(); }
+}
+function skip(){ advance(); }
+function prev(){
+  if(st.idx===0) return;
+  st.idx--; st.revealed=false; renderCard();
+}
+function finish(){
+  const seen=st.queue.length;
+  const learned=st.queue.filter((id,i,a)=>a.indexOf(id)===i)
+    .filter(id=>mastery(db.cards[id])>=5).length;
+  document.getElementById('done-stats').textContent=
+    'Показано карточек: '+seen+' · выучено: '+learned;
+  prog.session=null; saveProg();
+  show('done');
+}
+function saveSession(){
+  prog.session={scope:st.scope,scopeName:st.scopeName,filter:st.filter,
+                queue:st.queue,idx:st.idx,at:Date.now()};
+  saveProg();
+}
+
+/* ═══════════════════ жесты ═══════════════════ */
+(function(){
+  const body=document.getElementById('s-body');
+  let x0=0,y0=0,t0=0,moved=false;
+  body.addEventListener('touchstart',e=>{
+    const t=e.changedTouches[0];
+    x0=t.clientX; y0=t.clientY; t0=Date.now(); moved=false;
+  },{passive:true});
+  body.addEventListener('touchmove',e=>{
+    const t=e.changedTouches[0];
+    if(Math.abs(t.clientX-x0)>10||Math.abs(t.clientY-y0)>10) moved=true;
+  },{passive:true});
+  body.addEventListener('touchend',e=>{
+    const t=e.changedTouches[0];
+    const dx=t.clientX-x0, dy=t.clientY-y0, dt=Date.now()-t0;
+    // горизонтальный свайп — переход между карточками
+    if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.8){
+      dx<0?skip():prev();
+      return;
+    }
+    // короткий тап без движения — показать ответ
+    if(!moved&&dt<450&&!st.revealed){
+      if(e.target.closest('button,a,pre,.katex')) return;
+      reveal();
+    }
+  },{passive:true});
+})();
+
+// клавиатура — удобно проверять на компьютере
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('study').classList.contains('hidden')) return;
+  if(e.key===' '||e.key==='Enter'){ e.preventDefault(); st.revealed?rate(2):reveal(); }
+  else if(e.key==='ArrowRight') skip();
+  else if(e.key==='ArrowLeft') prev();
+  else if(st.revealed&&['1','2','3','4'].includes(e.key)) rate(+e.key-1);
+});
+
+/* ═══════════════════ GitHub ═══════════════════
+   Телефон только читает. Токен нужен минимальный — «Contents: read-only»
+   на один приватный репозиторий, — и лежит в IndexedDB рядом с карточками.
+*/
+const GH='https://api.github.com';
+let cfg=null;                       // {owner,repo,branch,token}
+let sync={busy:false,at:null,err:null};
+
+function ghURL(path){
+  const p=path.split('/').map(encodeURIComponent).join('/');
+  return GH+'/repos/'+encodeURIComponent(cfg.owner)+'/'+encodeURIComponent(cfg.repo)+
+         '/contents/'+p+'?ref='+encodeURIComponent(cfg.branch||'main');
+}
+function ghHead(accept,etag){
+  const h={'Accept':accept,'Authorization':'Bearer '+cfg.token,
+           'X-GitHub-Api-Version':'2022-11-28'};
+  if(etag) h['If-None-Match']=etag;
+  return h;
+}
+
+/* Человеческие формулировки вместо кодов ответа */
+function ghError(res){
+  if(res.status===401) return 'Токен не принят. Возможно, он истёк или скопирован не целиком.';
+  if(res.status===404) return 'Репозиторий или файл не найден. Проверьте владельца, название и что токену выдан доступ именно к этому репозиторию.';
+  if(res.status===403){
+    return res.headers.get('X-RateLimit-Remaining')==='0'
+      ? 'Исчерпан лимит запросов к GitHub. Попробуйте через час.'
+      : 'GitHub отказал в доступе. У токена нет прав на чтение содержимого.';
+  }
+  if(res.status===409) return 'Репозиторий пуст — в нём ещё нет файла data.json.';
+  return 'GitHub ответил ошибкой '+res.status+'.';
+}
+
+function b64ToBytes(b64){
+  const bin=atob((b64||'').replace(/\s/g,''));
+  const out=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
+  return out;
+}
+
+/* Забираем data.json. ETag экономит и трафик, и лимит запросов:
+   если файл не менялся, GitHub отвечает 304 и ничего не передаёт. */
+async function ghFetchData(etag){
+  const res=await fetch(ghURL('data.json'),
+    {headers:ghHead('application/vnd.github+json',etag),cache:'no-store'});
+  if(res.status===304) return {unchanged:true};
+  if(!res.ok) throw new Error(ghError(res));
+  const meta=await res.json();
+  let text;
+  if(meta.content&&meta.encoding==='base64'){
+    text=new TextDecoder('utf-8').decode(b64ToBytes(meta.content));
+  } else {
+    // файлы больше мегабайта приходят без содержимого — берём сырыми
+    const raw=await fetch(ghURL('data.json'),
+      {headers:ghHead('application/vnd.github.raw'),cache:'no-store'});
+    if(!raw.ok) throw new Error(ghError(raw));
+    text=await raw.text();
+  }
+  return {json:JSON.parse(text),etag:res.headers.get('ETag'),sha:meta.sha};
+}
+
+async function syncNow(manual){
+  if(!cfg||sync.busy) return false;
+  if(!navigator.onLine){
+    sync.err='Нет сети';
+    if(manual) toast('Нет сети — карточки из памяти телефона');
+    paintSync(); return false;
+  }
+  sync.busy=true; sync.err=null; paintSync();
+  try{
+    const prev=await kvGet('gh-etag');
+    const r=await ghFetchData(prev);
+    if(r.unchanged){
+      sync.at=Date.now(); await kvPut('gh-at',sync.at);
+      if(manual) toast('Карточки уже актуальны');
+    } else {
+      await kvPut('data',r.json);
+      await kvPut('gh-etag',r.etag);
+      sync.at=Date.now(); await kvPut('gh-at',sync.at);
+      const before=db?Object.keys(db.cards).length:0;
+      db=normalize(r.json); plainCache.clear();
+      meta={name:cfg.owner+'/'+cfg.repo,count:Object.keys(db.cards).length,at:sync.at};
+      await kvPut('meta',meta);
+      const delta=meta.count-before;
+      toast(delta>0?('Добавлено карточек: '+delta)
+           :delta<0?('Карточек стало меньше на '+(-delta))
+           :'Карточки обновлены');
+    }
+    sync.busy=false; paintSync();
+    if(!document.getElementById('home').classList.contains('hidden')){
+      renderChips(); renderTree();
+    }
+    return true;
+  }catch(e){
+    sync.busy=false; sync.err=e.message||'Не удалось обновить';
+    paintSync();
+    if(manual) toast(sync.err);
+    return false;
+  }
+}
+
+function paintSync(){
+  const b=document.getElementById('sync-btn');
+  if(!b) return;
+  b.classList.toggle('hidden',!cfg);
+  b.classList.toggle('busy',sync.busy);
+  b.classList.toggle('bad',!!sync.err&&!sync.busy);
+  b.textContent=sync.busy?'⟳':sync.err?'⚠':'⟳';
+}
+
+/* ── экран подключения ── */
+function openSetup(){
+  document.getElementById('f-owner').value=cfg?.owner||'';
+  document.getElementById('f-repo').value=cfg?.repo||'';
+  document.getElementById('f-branch').value=cfg?.branch||'main';
+  document.getElementById('f-token').value=cfg?.token||'';
+  document.getElementById('setup-forget').classList.toggle('hidden',!cfg);
+  setupStatus('','');
+  show('setup');
+}
+function closeSetup(){ db?goHome():openLoadScreen(); }
+function setupStatus(msg,cls){
+  const el=document.getElementById('setup-status');
+  el.textContent=msg; el.className=cls||'';
+}
+async function connectGH(){
+  const c={
+    owner:document.getElementById('f-owner').value.trim(),
+    repo:document.getElementById('f-repo').value.trim().replace(/^.*\//,''),
+    branch:document.getElementById('f-branch').value.trim()||'main',
+    token:document.getElementById('f-token').value.trim()
+  };
+  if(!c.owner||!c.repo||!c.token){ setupStatus('Заполните все поля','bad'); return; }
+  const btn=document.getElementById('setup-go');
+  btn.disabled=true; setupStatus('Проверяем…','wait');
+  const keep=cfg; cfg=c;
+  try{
+    const r=await ghFetchData(null);
+    const n=Object.keys(r.json?.cards||{}).length;
+    if(!n) throw new Error('Файл data.json найден, но карточек в нём нет');
+    await kvPut('gh',c);
+    await kvPut('data',r.json);
+    await kvPut('gh-etag',r.etag);
+    sync.at=Date.now(); sync.err=null; await kvPut('gh-at',sync.at);
+    db=normalize(r.json); plainCache.clear();
+    meta={name:c.owner+'/'+c.repo,count:n,at:sync.at};
+    await kvPut('meta',meta);
+    prog=(await kvGet('progress'))||{mastery:{},star:{},session:null};
+    prog.mastery=prog.mastery||{}; prog.star=prog.star||{};
+    setupStatus('Подключено. Карточек: '+n,'ok');
+    await askPersistence();
+    setTimeout(()=>{ goHome(); toast('Загружено карточек: '+n); },700);
+  }catch(e){
+    cfg=keep;
+    setupStatus(e.message||'Не удалось подключиться','bad');
+  }finally{ btn.disabled=false; }
+}
+async function forgetGH(){
+  cfg=null;
+  await kvPut('gh',null); await kvPut('gh-etag',null);
+  setupStatus('Репозиторий отключён. Карточки остались на телефоне.','ok');
+  document.getElementById('setup-forget').classList.add('hidden');
+  paintSync();
+}
+
+/* Android чистит хранилище сайтов при нехватке места.
+   Установленному приложению этот запрос обычно одобряют молча. */
+async function askPersistence(){
+  try{
+    if(navigator.storage?.persist&&!(await navigator.storage.persisted())){
+      await navigator.storage.persist();
+    }
+  }catch(_){}
+}
+
+/* ═══════════════════ картинки ═══════════════════
+   Качаем по факту открытия карточки и складываем в IndexedDB.
+   Вся библиотека на телефон не едет — только то, что вы реально смотрели.
+*/
+const IMG_STORE='images';
+const imgURLs=new Map();      // filename -> objectURL (на время сессии)
+const imgTries=new Map();     // filename -> Promise (чтобы не качать дважды)
+
+/* Раскладка по подпапкам: GitHub плохо себя ведёт при >3000 файлов в одной папке.
+   img_a3f2xyz.png → images/a3/img_a3f2xyz.png */
+function imgPaths(name){
+  const m=/^img_(..)/.exec(name);
+  const list=[];
+  if(m) list.push('images/'+m[1]+'/'+name);
+  list.push('images/'+name);                    // старая плоская раскладка
+  return list;
+}
+
+/* Тип определяем по сигнатуре файла, а не по расширению: при сжатии
+   на компьютере содержимое может стать WebP, а имя остаться прежним. */
+function sniffMime(bytes){
+  const b=bytes;
+  if(b[0]===0x89&&b[1]===0x50) return 'image/png';
+  if(b[0]===0xFF&&b[1]===0xD8) return 'image/jpeg';
+  if(b[0]===0x47&&b[1]===0x49) return 'image/gif';
+  if(b[0]===0x52&&b[1]===0x49&&b[8]===0x57&&b[9]===0x45) return 'image/webp';
+  if(b[0]===0x3C) return 'image/svg+xml';
+  return 'application/octet-stream';
+}
+
+async function imgFromCache(name){
+  const rec=await kvGet(IMG_STORE+':'+name);
+  if(!rec) return null;
+  const bytes=rec instanceof Uint8Array?rec:new Uint8Array(rec);
+  return new Blob([bytes],{type:sniffMime(bytes)});
+}
+
+async function imgFromGH(name){
+  if(!cfg) return null;
+  for(const path of imgPaths(name)){
+    let res;
+    try{
+      res=await fetch(ghURL(path),{headers:ghHead('application/vnd.github.raw')});
+    }catch(_){ return null; }              // нет сети — молча, карточка покажет заглушку
+    if(res.status===404) continue;         // попробуем следующую раскладку
+    if(!res.ok) return null;
+    const bytes=new Uint8Array(await res.arrayBuffer());
+    await kvPut(IMG_STORE+':'+name,bytes);
+    return new Blob([bytes],{type:sniffMime(bytes)});
+  }
+  return null;
+}
+
+async function imageURL(name){
+  if(!name) return null;
+  if(imgURLs.has(name)) return imgURLs.get(name);
+  if(imgTries.has(name)) return imgTries.get(name);
+
+  const p=(async()=>{
+    const blob=await imgFromCache(name)||await imgFromGH(name);
+    if(!blob) return null;
+    const url=URL.createObjectURL(blob);
+    imgURLs.set(name,url);
+    return url;
+  })();
+  imgTries.set(name,p);
+  const url=await p;
+  imgTries.delete(name);
+  return url;
+}
+
+/* Подставляем картинки в уже отрисованную карточку */
+function loadImages(root){
+  root.querySelectorAll('img[data-img]').forEach(async el=>{
+    const name=el.dataset.img;
+    const url=await imageURL(name);
+    const wrap=el.closest('.img-wrap');
+    if(url){ el.src=url; el.classList.remove('img-loading'); }
+    else if(wrap){
+      wrap.innerHTML='<div class="img-miss">🖼️ '+esc(name)+'<br>'+
+        '<span style="opacity:.6">'+
+        (cfg?'не удалось загрузить — нет сети или файла в репозитории'
+            :'подключите репозиторий, чтобы видеть картинки')+'</span></div>';
+    }
+  });
+}
+
+/* ═══════════════════ загрузка данных ═══════════════════ */
+function normalize(raw){
+  const d={topics:raw.topics||{},cards:raw.cards||{},roots:raw.roots||[],
+           sets:raw.sets||{}};
+  Object.values(d.topics).forEach(t=>{ t.children=t.children||[]; t.cards=t.cards||[]; });
+  Object.values(d.cards).forEach(c=>{ c.mastery=c.mastery||0; c.star=!!c.star; });
+  if(!d.roots.length){
+    d.roots=Object.values(d.topics).filter(t=>!t.parentId).map(t=>t.id);
+  }
+  return d;
+}
+/* Карточки сохраняются один раз и дальше подхватываются сами.
+   Выбор файла нужен только при первом запуске или по кнопке «Заменить файл». */
+async function useData(raw,source){
+  const parsed=normalize(raw);
+  const n=Object.keys(parsed.cards).length;
+  if(!n){ err('В файле нет карточек'); return; }
+  db=parsed;
+  plainCache.clear();          // тексты для поиска относятся к прошлому файлу
+
+  if(source){                                   // новый файл — запоминаем
+    meta={name:source,count:n,at:Date.now()};
+    const okData=await kvPut('data',raw);
+    const okMeta=await kvPut('meta',meta);
+    if(!okData||!okMeta||noStore) toast('Не удалось сохранить — файл придётся выбрать снова');
+  } else {                                      // восстановление прошлого запуска
+    meta=(await kvGet('meta'))||{name:'data.json',count:n,at:null};
+  }
+
+  prog=(await kvGet('progress'))||{mastery:{},star:{},session:null};
+  prog.mastery=prog.mastery||{}; prog.star=prog.star||{};
+  goHome();
+  if(source) toast('Загружено карточек: '+n);
+}
+function err(m){
+  const el=document.getElementById('load-err');
+  el.textContent=m; el.style.display='block';
+}
+document.getElementById('file-in').addEventListener('change',async e=>{
+  const f=e.target.files[0];
+  e.target.value='';                            // чтобы тот же файл можно было выбрать повторно
+  if(!f) return;
+  try{ await useData(JSON.parse(await f.text()),f.name); }
+  catch(ex){ err('Не удалось прочитать файл: '+ex.message); }
+});
+function loadDemo(){ useData(JSON.parse(JSON.stringify(DEMO)),'демо-карточки'); }
+
+function fmtDate(ts){
+  const d=new Date(ts);
+  return d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+', '+
+         d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+}
+
+/* Экран выбора файла. При замене показываем, что загружено сейчас, и даём отмену,
+   чтобы случайное нажатие не оставило человека без карточек. */
+function openLoadScreen(){
+  const has=!!db;
+  document.getElementById('load-title').textContent=has?'Заменить карточки':'Cards';
+  const cur=document.getElementById('load-current');
+  cur.innerHTML=has&&meta
+    ? 'Сейчас загружено: <b>'+esc(meta.name)+'</b> — '+meta.count+' карт.'+
+      (meta.at?'<br>от '+fmtDate(meta.at):'')+
+      '<br><span style="opacity:.7">Прогресс изучения сохранится.</span>'
+    : '';
+  cur.style.display=has?'block':'none';
+  document.getElementById('load-cancel').classList.toggle('hidden',!has);
+  document.getElementById('load-demo').classList.toggle('hidden',has);
+  document.getElementById('load-err').style.display='none';
+  show('load');
+}
+function reload(){ openLoadScreen(); }
+function cancelLoad(){ if(db) goHome(); }
+
+/* отладочный доступ к внутреннему состоянию — из консоли и автотестов */
+window.CardsApp={
+  get db(){return db}, get st(){return st}, get prog(){return prog}, get meta(){return meta},
+  get useLS(){return useLS}, get cfg(){return cfg}, get sync(){return sync},
+  kvGet,kvPut,blocksHTML,normalize,mastery,starred,cardsOf,buildQueue,
+  orderedCards,currentList,cardText,sideText,imgPaths,sniffMime,imageURL,ghError
+};
+
+/* Оболочка кэшируется, чтобы приложение открывалось без сети */
+if('serviceWorker' in navigator&&location.protocol==='https:'){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+window.addEventListener('online',()=>{ if(cfg) syncNow(false); });
+
+(async function init(){
+  cfg=await kvGet('gh');
+  sync.at=await kvGet('gh-at');
+
+  const saved=await kvGet('data');
+  if(saved){ await useData(saved,null); }       // сразу показываем то, что уже есть
+  else if(AUTOLOAD&&DEMO){ await useData(JSON.parse(JSON.stringify(DEMO)),AUTOLOAD); }
+  else if(cfg){ openLoadScreen(); }
+  else { openLoadScreen(); }
+
+  paintSync();
+  // обновление в фоне: карточки на экране уже есть, ждать сеть не нужно
+  if(cfg&&db) syncNow(false);
+  else if(cfg&&!db) await syncNow(true);
+  if(cfg) askPersistence();
+})();
+</script>
+</body>
+</html>
