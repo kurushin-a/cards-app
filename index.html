@@ -314,6 +314,151 @@ button{font-family:inherit;font-size:inherit;color:inherit;background:none;borde
   max-width:88vw;text-align:center;
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── конспект: вся ветка одной лентой ──────────── */
+.notes{
+  width:44px;align-self:stretch;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text2);font-size:15px;border-left:1px solid var(--border);
+}
+.notes:active{background:var(--bg3)}
+
+#ol-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:10px 12px calc(var(--safeB) + 40px)}
+#ol-meta{font-size:12.5px;color:var(--text2);padding:2px 2px 10px}
+
+#ol-toc-btn{
+  width:100%;text-align:left;font-size:14px;color:var(--text2);
+  padding:11px 14px;border:1px solid var(--border);border-radius:12px;
+  background:var(--bg2);margin-bottom:14px;
+}
+#ol-toc-btn:active{background:var(--bg3)}
+#ol-toc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:6px;margin-bottom:16px;max-height:52vh;overflow-y:auto}
+.toc-link{display:flex;align-items:baseline;gap:8px;width:100%;text-align:left;
+  padding:10px 10px;border-radius:8px;font-size:14.5px;line-height:1.35}
+.toc-link:active{background:var(--bg3)}
+.toc-num{color:var(--text2);font-size:12.5px;flex-shrink:0}
+.toc-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toc-count{font-size:11.5px;color:var(--text2);background:var(--bg3);
+  border-radius:100px;padding:2px 8px;flex-shrink:0}
+
+.ol-sec{margin-bottom:22px;scroll-margin-top:2px}
+.ol-sec.d1{padding-left:10px}
+.ol-sec.d2{padding-left:20px}
+.ol-sec.d3{padding-left:28px}
+.ol-sec.d4{padding-left:34px}
+.ol-head{
+  position:sticky;top:0;z-index:3;background:var(--bg);
+  display:flex;align-items:baseline;gap:8px;
+  padding:9px 0 7px;margin-bottom:11px;border-bottom:1px solid var(--border);
+}
+.ol-head .ol-num{color:var(--text2);flex-shrink:0;font-size:.82em;font-weight:600}
+.ol-head .ol-name{flex:1;min-width:0}
+.ol-head .ol-n{font-size:11.5px;font-weight:600;color:var(--text2);
+  background:var(--bg2);border-radius:100px;padding:2px 8px;flex-shrink:0}
+.ol-head.d0{font-size:21px;font-weight:700}
+.ol-head.d1{font-size:18px;font-weight:650}
+.ol-head.d2{font-size:16.5px;font-weight:600}
+.ol-head.d3,.ol-head.d4{font-size:15px;font-weight:600;color:var(--text2)}
+.ol-note{font-size:13px;color:var(--text2);font-style:italic;padding:0 0 4px}
+
+.ol-card{
+  position:relative;background:var(--bg2);border:1px solid var(--border);
+  border-left:3px solid var(--border);border-radius:12px;
+  padding:14px 14px 14px 13px;margin-bottom:9px;
+}
+.ol-card.star{border-left-color:var(--amber)}
+.ol-q{font-size:16.5px;font-weight:650;line-height:1.5}
+.ol-q .b-text,.ol-q .b-rich{font-size:16.5px;font-weight:650}
+.ol-a{margin-top:11px;padding-top:11px;border-top:1px dashed var(--border)}
+.ol-a .b-text,.ol-a .b-rich{font-size:16px}
+.ol-card .blk{margin-bottom:11px}
+.ol-star{position:absolute;top:6px;right:6px;width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:9px;font-size:16px;color:var(--text2);opacity:.45}
+.ol-star.on{color:var(--amber);opacity:1}
+.ol-star:active{background:var(--bg3)}
+
+/* ── доски (заметки) в теме ─────────────────────── */
+.nb-mark{font-size:12px;opacity:.6;margin-left:6px}
+#notes-sec{margin-bottom:14px}
+.sec-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;
+  color:var(--text2);padding:4px 2px 9px}
+.notes-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.note-tile{display:flex;flex-direction:column;text-align:left;overflow:hidden;
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px}
+.note-tile:active{background:var(--bg3)}
+.note-thumb{height:96px;display:flex;align-items:center;justify-content:center;
+  background:#121212;border-bottom:1px solid var(--border);font-size:30px;overflow:hidden}
+.note-thumb img{max-width:100%;max-height:100%;object-fit:contain}
+.note-thumb img.img-loading{width:100%;height:100%;animation:pulse 1.4s ease-in-out infinite}
+.note-title{font-size:14px;font-weight:600;line-height:1.35;padding:8px 10px 2px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.note-meta{font-size:11.5px;color:var(--text2);padding:0 10px 9px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── схема в карточке и просмотр на весь экран ─── */
+.b-img.zoomable{cursor:zoom-in}
+.b-diagram .b-img{background:#121212}
+@font-face{font-family:Virgil;src:url(vendor/excalidraw/Virgil.woff2) format('woff2');font-display:swap}
+@font-face{font-family:Cascadia;src:url(vendor/excalidraw/Cascadia.woff2) format('woff2');font-display:swap}
+#viewer{position:fixed;inset:0;z-index:60;background:#121212;overflow:hidden}
+#vw-stage{position:absolute;inset:0;touch-action:none;overflow:hidden}
+#vw-content{position:absolute;left:0;top:0;transform-origin:0 0}
+#vw-content>img,#vw-content>svg{display:block;max-width:none;user-select:none;-webkit-user-select:none}
+#vw-content.moving{will-change:transform}
+#vw-bar{position:absolute;left:0;right:0;top:0;z-index:2;display:flex;align-items:center;gap:8px;
+  padding:calc(var(--safeT) + 6px) 8px 6px 14px;
+  background:linear-gradient(rgba(18,18,18,.92),rgba(18,18,18,0))}
+#vw-title{flex:1;min-width:0;font-size:15px;font-weight:600;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#vw-bar .icon-btn{background:rgba(34,38,58,.85);color:var(--text)}
+#vw-msg{position:absolute;left:24px;right:24px;top:45%;text-align:center;
+  color:var(--text2);font-size:15px;line-height:1.55}
+#vw-hint{position:absolute;left:0;right:0;bottom:calc(var(--safeB) + 14px);text-align:center;
+  font-size:12.5px;color:var(--text2);opacity:.75;pointer-events:none}
+#vw-sheet{position:absolute;left:0;right:0;bottom:0;z-index:3;max-height:62vh;
+  display:flex;flex-direction:column;background:var(--bg);
+  border-top:1px solid var(--border);border-radius:16px 16px 0 0;
+  box-shadow:0 -8px 30px rgba(0,0,0,.45)}
+#vw-sheet-head{display:flex;align-items:center;gap:8px;padding:8px 8px 6px 16px;
+  font-size:13px;font-weight:600;color:var(--text2)}
+#vw-sheet-head span{flex:1}
+#vw-sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:0 12px calc(var(--safeB) + 16px)}
+.ans-btn{margin-top:10px;font-size:14px;color:var(--accentH);padding:6px 0}
+
+/* ── плашка «вышла новая версия» ────────────────── */
+#update-bar{position:fixed;left:12px;right:12px;bottom:calc(var(--safeB) + 14px);z-index:90;
+  display:flex;align-items:center;gap:12px;padding:10px 10px 10px 16px;
+  background:var(--bg3);border:1px solid var(--accent);border-radius:14px;
+  font-size:14.5px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+#update-bar span{flex:1}
+#update-btn{padding:9px 16px;border-radius:10px;background:var(--accent);color:#fff;
+  font-size:14.5px;font-weight:600}
+#update-btn:disabled{opacity:.6}
+
+/* ── печать / сохранение в PDF ──────────────────── */
+@media print{
+  @page{margin:12mm 10mm}
+  html,body{background:#fff!important;color:#111!important;height:auto!important;overflow:visible!important}
+  .screen{position:static!important;display:none!important}
+  .screen#outline{display:block!important}
+  .topbar,#ol-toc-btn,#ol-toc,.ol-star,#toast,#chips,#viewer,#update-bar{display:none!important}
+  #ol-body{overflow:visible!important;height:auto!important;padding:0!important}
+  .ol-head{position:static!important;background:#fff!important;color:#111!important;
+    border-bottom:1px solid #999!important;break-after:avoid}
+  .ol-head .ol-num,.ol-head .ol-n{color:#555!important;background:transparent!important}
+  .ol-card{break-inside:avoid;background:#fff!important;border:none!important;
+    border-bottom:1px solid #ddd!important;border-radius:0;padding:7px 0 9px;margin-bottom:0}
+  .ol-card.star{border-left:3px solid #999!important;padding-left:8px}
+  .ol-q,.ol-a,.b-text,.b-rich,.b-math,#ol-meta{color:#111!important}
+  .b-rich b,.b-rich strong{color:#111!important}
+  .ol-a{border-top:1px dashed #ccc!important}
+  .b-code{background:#f4f4f4!important;border:1px solid #ddd!important}
+  .b-code pre,.b-code code,.b-code code *{color:#111!important;background:transparent!important}
+}
 </style>
 </head>
 <body>
@@ -383,6 +528,7 @@ button{font-family:inherit;font-size:inherit;color:inherit;background:none;borde
   <div class="topbar">
     <button class="icon-btn" onclick="goHome()">←</button>
     <h1 id="list-title"></h1>
+    <button class="icon-btn" onclick="openOutlineHere()" title="Конспект: всё раскрыто одной лентой">📄</button>
     <button class="icon-btn" onclick="studyList()" title="Учить эти карточки">▶</button>
   </div>
   <div id="search-wrap">
@@ -392,6 +538,17 @@ button{font-family:inherit;font-size:inherit;color:inherit;background:none;borde
     <button id="search-clear" class="hidden" onclick="clearSearch()">✕</button>
   </div>
   <div id="cards"></div>
+</div>
+
+<!-- ══ OUTLINE («конспект») ══ -->
+<div class="screen hidden" id="outline">
+  <div class="topbar">
+    <button class="icon-btn" onclick="olBack()">←</button>
+    <h1 id="ol-title"></h1>
+    <button class="icon-btn" id="ol-star-btn" onclick="olToggleStar()" title="Только важные">☆</button>
+    <button class="icon-btn" onclick="window.print()" title="Печать / PDF">🖨</button>
+  </div>
+  <div id="ol-body"></div>
 </div>
 
 <!-- ══ STUDY ══ -->
@@ -417,12 +574,36 @@ button{font-family:inherit;font-size:inherit;color:inherit;background:none;borde
   <button class="btn-ghost-big" onclick="goHome()">К темам</button>
 </div>
 
+<!-- ══ VIEWER: схема, доска или картинка на весь экран ══ -->
+<div id="viewer" class="hidden">
+  <div id="vw-stage"><div id="vw-content"></div></div>
+  <div id="vw-msg" class="hidden"></div>
+  <div id="vw-hint">двумя пальцами — масштаб · двойной тап — приблизить</div>
+  <div id="vw-bar">
+    <div id="vw-title"></div>
+    <button class="icon-btn" onclick="vwFit()" title="Вписать целиком">⤢</button>
+    <button class="icon-btn" onclick="closeViewer()" title="Закрыть">✕</button>
+  </div>
+  <div id="vw-sheet" class="hidden">
+    <div id="vw-sheet-head"><span id="vw-sheet-title"></span>
+      <button class="icon-btn" onclick="closeSheet()">✕</button></div>
+    <div id="vw-sheet-body"></div>
+  </div>
+</div>
+
+<div id="update-bar" class="hidden">
+  <span>Вышла новая версия приложения</span>
+  <button id="update-btn" onclick="applyUpdate()">Обновить</button>
+</div>
+
 <div id="toast"></div>
 
 <script>
 const DEMO = {"topics":{"ml":{"id":"ml","name":"Machine Learning","parentId":null,"children":["ml-lin","ml-tree","ml-met"],"cards":[]},"ml-lin":{"id":"ml-lin","name":"Линейные модели","parentId":"ml","children":[],"cards":["c1","c2","c3","c4"]},"ml-tree":{"id":"ml-tree","name":"Деревья и ансамбли","parentId":"ml","children":[],"cards":["c5","c6","c7"]},"ml-met":{"id":"ml-met","name":"Метрики","parentId":"ml","children":[],"cards":["c8","c9","c10"]},"math":{"id":"math","name":"Математика","parentId":null,"children":["math-la","math-prob"],"cards":[]},"math-la":{"id":"math-la","name":"Линейная алгебра","parentId":"math","children":[],"cards":["c11","c12","c13"]},"math-prob":{"id":"math-prob","name":"Теория вероятностей","parentId":"math","children":[],"cards":["c14","c15","c16"]},"py":{"id":"py","name":"Python","parentId":null,"children":[],"cards":["c17","c18","c19","c20"]}},"cards":{"c1":{"id":"c1","topicId":"ml-lin","front":[{"type":"text","value":"Запишите функцию потерь линейной регрессии методом наименьших квадратов."}],"back":[{"type":"text","value":"Среднеквадратичная ошибка (MSE):"},{"type":"math","value":"L(w) = \\frac{1}{n}\\sum_{i=1}^{n}\\left(y_i - w^\\top x_i\\right)^2"},{"type":"text","value":"Аналитическое решение — нормальное уравнение:"},{"type":"math","value":"\\hat{w} = (X^\\top X)^{-1} X^\\top y"}],"mastery":3,"star":false},"c2":{"id":"c2","topicId":"ml-lin","front":[{"type":"text","value":"В чём разница между L1- и L2-регуляризацией?"}],"back":[{"type":"text","value":"<b>L1 (Lasso)<\/b> добавляет $\\lambda\\sum|w_j|$ — зануляет веса, даёт разреженное решение и по сути отбирает признаки.<br><b>L2 (Ridge)<\/b> добавляет $\\lambda\\sum w_j^2$ — сжимает веса к нулю, но не зануляет их; хорошо справляется с мультиколлинеарностью.","rich":true},{"type":"code","value":"from sklearn.linear_model import Lasso, Ridge\n\nlasso = Lasso(alpha=0.1)   # L1\nridge = Ridge(alpha=1.0)   # L2","lang":"python"}],"mastery":2,"star":true},"c3":{"id":"c3","topicId":"ml-lin","front":[{"type":"text","value":"Почему для логистической регрессии не используют MSE?"}],"back":[{"type":"text","value":"С сигмоидой MSE становится невыпуклой — градиентный спуск застревает в локальных минимумах. Log-loss выпукла:"},{"type":"math","value":"L = -\\frac{1}{n}\\sum_{i=1}^{n}\\Big[y_i\\log \\hat{p}_i + (1-y_i)\\log(1-\\hat{p}_i)\\Big]"}],"mastery":1,"star":false},"c4":{"id":"c4","topicId":"ml-lin","front":[{"type":"text","value":"Что такое мультиколлинеарность и чем она вредна?"}],"back":[{"type":"text","value":"Сильная линейная зависимость между признаками. $X^\\top X$ становится плохо обусловленной, оценки весов приобретают огромную дисперсию: коэффициенты скачут от небольших изменений в данных и теряют интерпретируемость. Лечится L2, PCA или удалением признаков (VIF > 10)."}],"mastery":0,"star":false},"c5":{"id":"c5","topicId":"ml-tree","front":[{"type":"text","value":"Что такое энтропия и прирост информации в дереве решений?"}],"back":[{"type":"math","value":"H(S) = -\\sum_{i=1}^{c} p_i \\log_2 p_i"},{"type":"text","value":"Прирост информации от разбиения по признаку A:"},{"type":"math","value":"IG(S, A) = H(S) - \\sum_{v \\in A} \\frac{|S_v|}{|S|} H(S_v)"},{"type":"text","value":"Дерево на каждом шаге жадно выбирает разбиение с максимальным IG."}],"mastery":4,"star":false},"c6":{"id":"c6","topicId":"ml-tree","front":[{"type":"text","value":"Чем бэггинг отличается от бустинга?"}],"back":[{"type":"text","value":"<b>Бэггинг<\/b> — модели учатся <i>параллельно<\/i> и независимо на бутстрап-выборках, предсказания усредняются. Снижает <b>дисперсию<\/b>. Пример: Random Forest.<br><br><b>Бустинг<\/b> — модели учатся <i>последовательно<\/i>, каждая следующая исправляет ошибки предыдущих. Снижает <b>смещение<\/b>. Пример: XGBoost, CatBoost.","rich":true}],"mastery":2,"star":true},"c7":{"id":"c7","topicId":"ml-tree","front":[{"type":"text","value":"Как Random Forest декоррелирует деревья?"}],"back":[{"type":"text","value":"Двумя источниками случайности: бутстрап-выборка объектов и случайное подмножество признаков в каждом узле (обычно $\\sqrt{p}$ для классификации, $p/3$ для регрессии). Без второго все деревья хватались бы за один и тот же сильный признак и были бы почти одинаковыми."},{"type":"code","value":"RandomForestClassifier(\n    n_estimators=500,\n    max_features='sqrt',\n    bootstrap=True,\n)","lang":"python"}],"mastery":1,"star":false},"c8":{"id":"c8","topicId":"ml-met","front":[{"type":"text","value":"Точность (precision) и полнота (recall) — формулы и когда что важнее."}],"back":[{"type":"math","value":"\\text{Precision} = \\frac{TP}{TP + FP} \\qquad \\text{Recall} = \\frac{TP}{TP + FN}"},{"type":"text","value":"<b>Precision<\/b> важнее, когда дорога ложная тревога (спам-фильтр отправил важное письмо в спам).<br><b>Recall<\/b> важнее, когда дорог пропуск (скрининг на онкологию, поиск мошенничества).","rich":true}],"mastery":5,"star":false},"c9":{"id":"c9","topicId":"ml-met","front":[{"type":"text","value":"Что показывает ROC-AUC и в чём его слабое место?"}],"back":[{"type":"text","value":"Вероятность того, что случайно взятый положительный объект получит больший скор, чем случайно взятый отрицательный. AUC = 0.5 — случайное угадывание."},{"type":"text","value":"Слабое место: при сильном дисбалансе классов ROC-AUC выглядит оптимистично, потому что FPR нормируется на большое число негативов. В таких задачах честнее PR-AUC."}],"mastery":3,"star":false},"c10":{"id":"c10","topicId":"ml-met","front":[{"type":"text","value":"Запишите F1-меру и объясните, почему берут гармоническое среднее."}],"back":[{"type":"math","value":"F_1 = 2 \\cdot \\frac{\\text{Precision} \\cdot \\text{Recall}}{\\text{Precision} + \\text{Recall}}"},{"type":"text","value":"Гармоническое среднее сильно штрафует дисбаланс: при precision = 1.0 и recall = 0.0 арифметическое дало бы 0.5, а F1 даёт 0. Хорошая оценка требует, чтобы обе величины были высокими."}],"mastery":2,"star":false},"c11":{"id":"c11","topicId":"math-la","front":[{"type":"text","value":"Определение собственного вектора и собственного значения."}],"back":[{"type":"text","value":"Вектор $v \\neq 0$ — собственный для матрицы $A$, если преобразование только растягивает его, не поворачивая:"},{"type":"math","value":"Av = \\lambda v"},{"type":"text","value":"Собственные значения находят из характеристического уравнения:"},{"type":"math","value":"\\det(A - \\lambda I) = 0"}],"mastery":3,"star":true},"c12":{"id":"c12","topicId":"math-la","front":[{"type":"text","value":"Что делает сингулярное разложение (SVD)?"}],"back":[{"type":"text","value":"Раскладывает любую матрицу $m \\times n$ на три:"},{"type":"math","value":"A = U \\Sigma V^\\top"},{"type":"text","value":"$U$ и $V$ ортогональны, $\\Sigma$ диагональна с неотрицательными сингулярными числами. Геометрически: <b>поворот → растяжение по осям → поворот<\/b>. Оставив $k$ наибольших сингулярных чисел, получаем лучшее приближение ранга $k$ — это основа PCA и сжатия.","rich":true}],"mastery":1,"star":false},"c13":{"id":"c13","topicId":"math-la","front":[{"type":"text","value":"Чему равен след матрицы и какое у него полезное свойство?"}],"back":[{"type":"text","value":"Сумма диагональных элементов. Свойства:"},{"type":"math","value":"\\operatorname{tr}(A) = \\sum_i \\lambda_i \\qquad \\operatorname{tr}(AB) = \\operatorname{tr}(BA)"},{"type":"text","value":"Второе равенство работает даже когда $AB$ и $BA$ разного размера — постоянно используется при выводе градиентов."}],"mastery":0,"star":false},"c14":{"id":"c14","topicId":"math-prob","front":[{"type":"text","value":"Формула Байеса и названия всех её частей."}],"back":[{"type":"math","value":"P(A \\mid B) = \\frac{P(B \\mid A)\\, P(A)}{P(B)}"},{"type":"text","value":"$P(A)$ — априорная вероятность, $P(B \\mid A)$ — правдоподобие, $P(B)$ — нормировка (маргинальная вероятность), $P(A \\mid B)$ — апостериорная вероятность."}],"mastery":4,"star":false},"c15":{"id":"c15","topicId":"math-prob","front":[{"type":"text","value":"Сформулируйте центральную предельную теорему."}],"back":[{"type":"text","value":"Сумма большого числа независимых одинаково распределённых величин с конечной дисперсией распределена приблизительно нормально — независимо от исходного распределения:"},{"type":"math","value":"\\frac{\\bar{X}_n - \\mu}{\\sigma / \\sqrt{n}} \\xrightarrow{d} \\mathcal{N}(0, 1)"},{"type":"text","value":"Именно поэтому доверительные интервалы для среднего работают почти всегда."}],"mastery":2,"star":false},"c16":{"id":"c16","topicId":"math-prob","front":[{"type":"text","value":"Разложение ошибки на смещение и дисперсию."}],"back":[{"type":"math","value":"\\mathbb{E}\\big[(y - \\hat{f}(x))^2\\big] = \\underbrace{\\text{Bias}^2}_{\\text{недообучение}} + \\underbrace{\\text{Var}}_{\\text{переобучение}} + \\underbrace{\\sigma^2}_{\\text{шум}}"},{"type":"text","value":"Простая модель — высокое смещение, низкая дисперсия. Сложная — наоборот. Неустранимый шум $\\sigma^2$ задаёт предел качества."}],"mastery":1,"star":true},"c17":{"id":"c17","topicId":"py","front":[{"type":"text","value":"Чем list comprehension отличается от генератора?"}],"back":[{"type":"code","value":"squares = [x**2 for x in range(10)]   # список: всё в памяти сразу\ngen     = (x**2 for x in range(10))   # генератор: ленивый, по одному\n\nsum(x**2 for x in range(10_000_000))  # без генератора съело бы ~400 МБ","lang":"python"},{"type":"text","value":"Генератор считает элементы по требованию и хранит только текущее состояние — обязателен для больших или бесконечных последовательностей."}],"mastery":3,"star":false},"c18":{"id":"c18","topicId":"py","front":[{"type":"text","value":"Почему изменяемый объект нельзя использовать как значение аргумента по умолчанию?"}],"back":[{"type":"code","value":"def bad(item, box=[]):      # ловушка\n    box.append(item)\n    return box\n\nbad(1)  # [1]\nbad(2)  # [1, 2] — тот же список!\n\ndef good(item, box=None):  # правильно\n    if box is None:\n        box = []\n    box.append(item)\n    return box","lang":"python"},{"type":"text","value":"Значение по умолчанию вычисляется один раз при определении функции, а не при каждом вызове."}],"mastery":2,"star":true},"c19":{"id":"c19","topicId":"py","front":[{"type":"text","value":"Что делает декоратор @property?"}],"back":[{"type":"code","value":"class Circle:\n    def __init__(self, r):\n        self._r = r\n\n    @property\n    def area(self):\n        return 3.14159 * self._r ** 2\n\nc = Circle(2)\nc.area      # 12.566 — вызывается как атрибут, без скобок","lang":"python"},{"type":"text","value":"Превращает метод в вычисляемый атрибут. Позволяет добавить логику к обращению к полю, не ломая существующий код."}],"mastery":0,"star":false},"c20":{"id":"c20","topicId":"py","front":[{"type":"text","value":"Объясните GIL одним абзацем."}],"back":[{"type":"text","value":"Global Interpreter Lock — мьютекс, из-за которого в один момент времени байт-код Python исполняет только <b>один<\/b> поток. Поэтому потоки не ускоряют CPU-задачи, но прекрасно работают для I/O (при ожидании сети GIL отпускается). Для параллельных вычислений нужен <code>multiprocessing<\/code> или библиотеки, отпускающие GIL — например NumPy.","rich":true}],"mastery":4,"star":false}},"roots":["ml","math","py"],"sets":{"Собеседование по ML":{"filter":"all","entries":[{"topicId":"ml","exclude":[]},{"topicId":"math-prob","exclude":[]}]}},"studyProgress":{},"recentScopes":[]};
 // сборка «для примерки»: карточки уже внутри файла, открывается сразу на темах
 const AUTOLOAD = false;
+// проставляет deploy-app.py: «20261025-1403-ab12cd34» — дата, время, отпечаток содержимого
+const APP_VERSION = "20261025-1546-9e257d18";
 
 /* ═══════════════════ IndexedDB ═══════════════════
    Две независимые записи:
@@ -485,7 +666,8 @@ let db=null;
 let meta=null;   // {name, count, at} — что именно загружено и когда
 let prog={mastery:{},star:{},session:null};
 let st={scope:null,scopeName:'',filter:'all',queue:[],idx:0,revealed:false,open:{},
-        listScope:null,listIds:[],query:'',from:'home'};
+        listScope:null,listIds:[],query:'',from:'home',
+        outline:null,olFrom:'home',olToc:false};
 let saveT=null;
 
 const MLABEL=['Новая','Изучаю','Изучаю','Повторяю','Повторяю','Выучена'];
@@ -572,14 +754,17 @@ function blocksHTML(side){
              '">'+esc(b.value||'')+'</code></pre></div>';
     if(b.type==='math')
       return '<div class="blk b-math">'+mathHTML(b.value||'',true)+'</div>';
-    if(b.type==='image'&&b.value){
-      const cached=imgURLs.get(b.value);
-      return '<div class="blk img-wrap"><img class="b-img'+(b.inverted?' inverted':'')+
-             (cached?'':' img-loading')+'" data-img="'+esc(b.value)+'"'+
-             (cached?' src="'+cached+'"':'')+' alt=""></div>';
-    }
+    if(b.type==='image'&&b.value) return imgBlockHTML(b.value,b.inverted?' inverted':'','');
+    // схема из редактора — её картинка-превью; тап открывает её на весь экран
+    if(b.type==='diagram'&&b.preview) return imgBlockHTML(b.preview,'',' b-diagram');
     return '';
   }).join('');
+}
+function imgBlockHTML(name,imgCls,wrapCls){
+  const cached=imgURLs.get(name);
+  return '<div class="blk img-wrap'+wrapCls+'"><img class="b-img zoomable'+imgCls+
+         (cached?'':' img-loading')+'" data-img="'+esc(name)+'"'+
+         (cached?' src="'+cached+'"':'')+' alt=""></div>';
 }
 function enhance(root){
   loadImages(root);
@@ -617,11 +802,12 @@ function applyFilter(list){ return list.filter(FILTERS[st.filter].test); }
 
 /* ═══════════════════ экраны ═══════════════════ */
 function show(id){
-  ['load','setup','home','list','study','done'].forEach(s=>
+  ['load','setup','home','list','study','done','outline'].forEach(s=>
     document.getElementById(s).classList.toggle('hidden',s!==id));
 }
 function goHome(){
   if(st.queue.length) saveSession();
+  st.outline=null;
   show('home'); renderChips(); renderTree();
 }
 /* «←» на экране изучения возвращает туда, откуда пришли */
@@ -652,9 +838,11 @@ function topicRow(tid,depth){
   let h='<div class="row'+(depth?' sub':'')+'">'+
     '<div class="row-top">'+
       '<button class="row-main" onclick="openList(\''+tid+'\')">'+
-        '<span class="row-name">'+esc(t.name)+'</span>'+
+        '<span class="row-name">'+esc(t.name)+
+          (topicNotes(tid).length?'<span class="nb-mark" title="Есть доски">🗺</span>':'')+'</span>'+
         '<span class="count'+(n?'':' zero')+'">'+n+'</span>'+
       '</button>'+
+      '<button class="notes" onclick="openOutline(\''+tid+'\')" title="Конспект">📄</button>'+
       '<button class="play" onclick="start(\''+tid+'\',event)" title="Учить">▶</button>'+
       (kids.length?'<button class="caret'+(open?' open':'')+
         '" onclick="toggle(\''+tid+'\')">⌄</button>':'')+
@@ -688,7 +876,15 @@ function renderTree(){
       (cfg
         ? '<button class="src-btn" onclick="openSetup()">Настройки подключения</button>'
         : '<button class="src-btn" onclick="reload()">Источник карточек</button>')+
+      '<div class="src-line" style="margin:14px 0 0">'+versionLabel()+'</div>'+
     '</div>';
+}
+
+/* «20261025-1403-ab12cd34» → «Приложение от 25 октября, 14:03» */
+function versionLabel(){
+  const m=/^(\d{4})(\d\d)(\d\d)-(\d\d)(\d\d)/.exec(APP_VERSION);
+  if(!m) return 'Приложение: сборка без версии';
+  return 'Приложение от '+fmtDate(new Date(+m[1],m[2]-1,+m[3],+m[4],+m[5]).getTime());
 }
 
 /* ═══════════════════ список карточек ═══════════════════ */
@@ -777,12 +973,14 @@ function renderList(){
   const q=st.query.trim().toLowerCase();
   st.listIds=list.map(c=>c.id);
 
+  const notes=q?'':notesHTML(st.listScope);
   if(!list.length){
-    el.innerHTML='<div class="empty">'+
+    el.innerHTML=notes+'<div class="empty">'+
       (q?'Ничего не найдено':'Здесь пока нет карточек по этому фильтру')+'</div>';
+    loadImages(el);
     return;
   }
-  el.innerHTML=list.map((c,i)=>{
+  el.innerHTML=notes+list.map((c,i)=>{
     const m=Math.max(0,Math.min(5,mastery(c)));
     const t=cardText(c);
     // если совпадение только в ответе — показываем кусок ответа, иначе вопрос
@@ -805,6 +1003,34 @@ function renderList(){
   }).join('')+
   '<div id="list-count">'+list.length+' '+plural(list.length,'карточка','карточки','карточек')+
     (st.filter==='all'?'':' · фильтр «'+FILTERS[st.filter].label+'»')+'</div>';
+  if(notes) loadImages(el);
+}
+
+/* ── доски (заметки) ──
+   Заметка — доска Excalidraw с компьютера: { id, topicId, title, preview, svg, updated }.
+   preview — миниатюра PNG для плитки, svg — вся доска в векторе для просмотра.
+   Править их здесь нельзя, только смотреть. */
+function topicNotes(tid){
+  return (db.topics[tid]?.notes||[]).map(id=>db.notes[id]).filter(Boolean);
+}
+function notesHTML(tid){
+  if(!tid||tid==='*') return '';
+  const notes=descendants(tid).flatMap(topicNotes);
+  if(!notes.length) return '';
+  return '<div id="notes-sec"><div class="sec-label">Доски · '+notes.length+'</div>'+
+    '<div class="notes-grid">'+notes.map(n=>
+      '<button class="note-tile" onclick="openNote(\''+n.id+'\')">'+
+        '<span class="note-thumb">'+(n.preview
+          ? '<img class="img-loading" data-img="'+esc(n.preview)+'" alt="">'
+          : '🗺️')+'</span>'+
+        '<span class="note-title">'+esc(n.title||'Без названия')+'</span>'+
+        '<span class="note-meta">'+
+          esc(n.topicId!==tid?(db.topics[n.topicId]?.name||''):noteDate(n.updated))+'</span>'+
+      '</button>').join('')+
+    '</div></div>';
+}
+function noteDate(ts){
+  return ts?new Date(ts).toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'}):'';
 }
 
 function plural(n,one,few,many){
@@ -828,6 +1054,142 @@ function clearSearch(){
   inp.value=''; inp.focus();
   document.getElementById('search-clear').classList.add('hidden');
   renderList();
+}
+
+/* ═══════════════════ конспект ═══════════════════
+   Вся ветка одной лентой: тема, её карточки, затем каждая подтема —
+   рекурсивно, со своим заголовком. Всё раскрыто: вопрос жирным,
+   ответ под ним. Действует текущий фильтр («Все», «Важные», …). */
+
+function openOutline(tid){
+  if(!tid) return;
+  if(tid!=='*'&&!db.topics[tid]) return;
+  st.olFrom=document.getElementById('list').classList.contains('hidden')?'home':'list';
+  st.outline=tid;
+  st.olToc=false;
+  show('outline');
+  renderOutline();
+  document.getElementById('ol-body').scrollTop=0;
+}
+function openOutlineHere(){ openOutline(st.listScope); }
+function olBack(){
+  st.outline=null;
+  if(st.olFrom==='list'&&st.listScope){ show('list'); renderList(); }
+  else goHome();
+}
+/* ⭐ в шапке переключает общий фильтр между «Важные» и «Все» */
+function olToggleStar(){
+  st.filter=st.filter==='star'?'all':'star';
+  renderChips();
+  renderOutline();
+  document.getElementById('ol-body').scrollTop=0;
+}
+function olToggleToc(){
+  st.olToc=!st.olToc;
+  renderOutline();
+}
+function olJump(tid){
+  st.olToc=false;
+  renderOutline();
+  document.getElementById('ol-sec-'+tid)?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* Плоский список разделов в порядке обхода дерева.
+   Плоский — чтобы липкие заголовки сменяли друг друга, а не копились стопкой. */
+function olSections(tid){
+  const out=[];
+  function walk(id,depth,num){
+    const t=db.topics[id]; if(!t) return;
+    const own=(t.cards||[]).map(c=>db.cards[c]).filter(Boolean);
+    const sec={id,name:t.name,depth,num,cards:applyFilter(own),deep:0};
+    out.push(sec);
+    const from=out.length;
+    (t.children||[]).forEach((c,i)=>walk(c,depth+1,num?num+'.'+(i+1):''+(i+1)));
+    sec.deep=sec.cards.length+out.slice(from).reduce((s,x)=>s+x.cards.length,0);
+  }
+  if(tid==='*') (db.roots||[]).forEach((r,i)=>walk(r,0,''+(i+1)));
+  else walk(tid,0,'');
+  return out;
+}
+
+function renderOutline(){
+  const tid=st.outline;
+  const name=tid==='*'?'Все карточки':(db.topics[tid]?.name||'Конспект');
+  document.getElementById('ol-title').textContent=name;
+
+  const starBtn=document.getElementById('ol-star-btn');
+  starBtn.textContent=st.filter==='star'?'★':'☆';
+  starBtn.style.color=st.filter==='star'?'var(--amber)':'';
+
+  const all=olSections(tid);
+  const secs=all.filter(s=>s.deep>0);
+  const total=all.filter(s=>s.depth===0).reduce((n,s)=>n+s.deep,0);
+  const el=document.getElementById('ol-body');
+
+  if(!secs.length){
+    el.innerHTML='<div class="empty">'+
+      (st.filter==='all'?'В этой ветке пока нет карточек'
+                        :'Нет карточек по фильтру «'+FILTERS[st.filter].label+'»')+'</div>';
+    return;
+  }
+
+  let h='<div id="ol-meta">'+secs.length+' раздел'+plural(secs.length,'','а','ов')+' · '+
+        total+' карточ'+plural(total,'ка','ки','ек')+
+        (st.filter==='all'?'':' · фильтр «'+FILTERS[st.filter].label+'»')+'</div>';
+
+  if(secs.length>1){
+    h+='<button id="ol-toc-btn" onclick="olToggleToc()">'+
+       (st.olToc?'▾':'▸')+' Оглавление · '+secs.length+'</button>';
+    if(st.olToc){
+      h+='<div id="ol-toc">'+secs.map(s=>
+        '<button class="toc-link" style="padding-left:'+(10+s.depth*13)+'px" '+
+        'onclick="olJump(\''+s.id+'\')">'+
+          (s.num?'<span class="toc-num">'+s.num+'</span>':'')+
+          '<span class="toc-name">'+esc(s.name)+'</span>'+
+          '<span class="toc-count">'+s.deep+'</span>'+
+        '</button>').join('')+'</div>';
+    }
+  }
+
+  h+=secs.map(s=>{
+    const d=Math.min(s.depth,4);
+    let x='<div class="ol-sec d'+d+'" id="ol-sec-'+s.id+'">'+
+      '<div class="ol-head d'+d+'">'+
+        (s.num?'<span class="ol-num">'+s.num+'</span>':'')+
+        '<span class="ol-name">'+esc(s.name)+'</span>'+
+        (s.cards.length?'<span class="ol-n">'+s.cards.length+'</span>':'')+
+      '</div>';
+    x+=s.cards.length
+      ? s.cards.map(olCardHTML).join('')
+      : '<div class="ol-note">— своих карточек нет, смотрите разделы ниже</div>';
+    return x+'</div>';
+  }).join('');
+
+  el.innerHTML=h;
+  enhance(el);
+}
+
+function olCardHTML(c){
+  const back=blocksHTML(c.back);
+  return '<div class="ol-card'+(starred(c)?' star':'')+'" data-ol="'+c.id+'">'+
+    '<button class="ol-star'+(starred(c)?' on':'')+'" onclick="olStar(event,\''+c.id+'\')" '+
+      'title="Важное">'+(starred(c)?'★':'☆')+'</button>'+
+    '<div class="ol-q">'+blocksHTML(c.front)+'</div>'+
+    (back.trim()?'<div class="ol-a">'+back+'</div>':'')+
+  '</div>';
+}
+
+function olStar(e,id){
+  e.stopPropagation();
+  const c=db.cards[id]; if(!c) return;
+  const on=!starred(c);
+  prog.star[id]=on; saveProg();
+  if(st.filter==='star'&&!on){ renderOutline(); return; }
+  const el=document.querySelector('[data-ol="'+id+'"]');
+  if(!el) return;
+  el.classList.toggle('star',on);
+  const b=el.querySelector('.ol-star');
+  b.textContent=on?'★':'☆'; b.classList.toggle('on',on);
 }
 
 /* Открыть конкретную карточку: очередь — то, что сейчас в списке,
@@ -1003,7 +1365,7 @@ function saveSession(){
     }
     // короткий тап без движения — показать ответ
     if(!moved&&dt<450&&!st.revealed){
-      if(e.target.closest('button,a,pre,.katex')) return;
+      if(e.target.closest('button,a,pre,.katex,.zoomable')) return;
       reveal();
     }
   },{passive:true});
@@ -1365,6 +1727,7 @@ function loadImages(root){
     const url=await imageURL(name);
     const wrap=el.closest('.img-wrap');
     if(url){ el.src=url; el.classList.remove('img-loading'); }
+    else if(el.closest('.note-thumb')){ el.closest('.note-thumb').textContent='🗺️'; }
     else if(wrap){
       wrap.innerHTML='<div class="img-miss">🖼️ '+esc(name)+'<br>'+
         '<span style="opacity:.6">'+
@@ -1374,10 +1737,255 @@ function loadImages(root){
   });
 }
 
+async function fileBlob(name){
+  return await imgFromCache(name)||await imgFromGH(name);
+}
+
+/* ═══════════════════ просмотр на весь экран ═══════════════════
+   Схема, доска или картинка: один палец двигает, два — масштабируют,
+   двойной тап приближает и возвращает. Доска приходит векторной SVG и
+   вставляется прямо в страницу, поэтому чёткая при любом приближении;
+   фигура со ссылкой «cards:…» по тапу показывает свои карточки. */
+const vw={open:false,w:1,h:1,s:1,fit:1,tx:0,ty:0,pts:new Map(),
+          pinch:null,pan:null,tap:null,lastTap:null,tapT:null,idleT:null,token:0};
+
+function openViewerShell(title){
+  vw.token++;
+  document.getElementById('vw-title').textContent=title||'';
+  document.getElementById('vw-content').innerHTML='';
+  document.getElementById('vw-hint').classList.remove('hidden');
+  closeSheet();
+  vwMsg('Загружаем…');
+  document.getElementById('viewer').classList.remove('hidden');
+  vw.open=true;
+  if(!history.state?.viewer) history.pushState({viewer:1},'');
+  return vw.token;
+}
+/* ✕ и системная «назад» закрывают одинаково — через историю */
+function closeViewer(){
+  if(history.state?.viewer) history.back();
+  else hideViewer();
+}
+function hideViewer(){
+  vw.open=false; vw.token++;
+  clearTimeout(vw.tapT);
+  document.getElementById('viewer').classList.add('hidden');
+  document.getElementById('vw-content').innerHTML='';
+  vw.pts.clear(); vw.pinch=vw.pan=vw.tap=vw.lastTap=null;
+}
+window.addEventListener('popstate',()=>{ if(vw.open) hideViewer(); });
+window.addEventListener('resize',()=>{ if(vw.open) vwFit(); });
+
+function vwMsg(text){
+  const el=document.getElementById('vw-msg');
+  el.textContent=text||''; el.classList.toggle('hidden',!text);
+}
+function vwMount(node,w,h){
+  const box=document.getElementById('vw-content');
+  box.innerHTML=''; box.appendChild(node);
+  vw.w=Math.max(1,w); vw.h=Math.max(1,h);
+  vwMsg('');
+  vwFit();
+}
+function vwImage(url,token,inverted){
+  return new Promise(res=>{
+    const im=new Image();
+    im.draggable=false;
+    if(inverted) im.style.filter='invert(1) hue-rotate(180deg)';
+    im.onload=()=>{ if(token===vw.token) vwMount(im,im.naturalWidth,im.naturalHeight); res(true); };
+    im.onerror=()=>{ if(token===vw.token) vwMsg('Не удалось открыть картинку'); res(false); };
+    im.src=url;
+  });
+}
+function vwFit(){
+  vw.fit=Math.min(innerWidth/vw.w,innerHeight/vw.h)*.94;
+  vw.s=vw.fit;
+  vw.tx=(innerWidth-vw.w*vw.s)/2; vw.ty=(innerHeight-vw.h*vw.s)/2;
+  vwApply();
+}
+function vwClamp(s){ return Math.min(Math.max(s,vw.fit*.5),Math.max(vw.fit*4,6)); }
+function vwApply(){
+  document.getElementById('vw-content').style.transform=
+    'translate('+vw.tx+'px,'+vw.ty+'px) scale('+vw.s+')';
+}
+/* масштаб s вокруг точки экрана (x,y): точка под пальцем остаётся на месте */
+function vwZoomAt(s,x,y){
+  s=vwClamp(s);
+  const px=(x-vw.tx)/vw.s, py=(y-vw.ty)/vw.s;
+  vw.s=s; vw.tx=x-px*s; vw.ty=y-py*s;
+  vwApply();
+}
+/* Во время жеста слой двигается готовым растром — плавно; после — перерисовка в полную чёткость */
+function vwMoving(){
+  const box=document.getElementById('vw-content');
+  box.classList.add('moving');
+  clearTimeout(vw.idleT);
+  vw.idleT=setTimeout(()=>box.classList.remove('moving'),180);
+}
+
+(function(){
+  const stage=document.getElementById('vw-stage');
+  stage.addEventListener('pointerdown',e=>{
+    try{ stage.setPointerCapture(e.pointerId); }catch(_){}
+    document.getElementById('vw-hint').classList.add('hidden');   // разобрались — подсказка не нужна
+    vw.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(vw.pts.size===1){
+      vw.pan={x:e.clientX,y:e.clientY,tx:vw.tx,ty:vw.ty};
+      vw.tap={x:e.clientX,y:e.clientY,t:Date.now()};
+    } else if(vw.pts.size===2){
+      const [a,b]=[...vw.pts.values()];
+      vw.pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,s:vw.s,
+                mx:(a.x+b.x)/2,my:(a.y+b.y)/2,tx:vw.tx,ty:vw.ty};
+      vw.pan=vw.tap=null;
+    }
+  });
+  stage.addEventListener('pointermove',e=>{
+    if(!vw.pts.has(e.pointerId)) return;
+    vw.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(vw.pinch&&vw.pts.size>=2){
+      const [a,b]=[...vw.pts.values()], p=vw.pinch;
+      const s=vwClamp(p.s*Math.hypot(a.x-b.x,a.y-b.y)/p.d);
+      // точка, что была между пальцами в начале щипка, едет вместе с ними
+      const px=(p.mx-p.tx)/p.s, py=(p.my-p.ty)/p.s;
+      vw.s=s; vw.tx=(a.x+b.x)/2-px*s; vw.ty=(a.y+b.y)/2-py*s;
+      vwApply(); vwMoving();
+    } else if(vw.pan){
+      const dx=e.clientX-vw.pan.x, dy=e.clientY-vw.pan.y;
+      if(vw.tap&&Math.hypot(dx,dy)>8) vw.tap=null;
+      vw.tx=vw.pan.tx+dx; vw.ty=vw.pan.ty+dy;
+      vwApply(); vwMoving();
+    }
+  });
+  const up=e=>{
+    if(!vw.pts.has(e.pointerId)) return;
+    vw.pts.delete(e.pointerId);
+    if(vw.pts.size===1){                 // один палец остался — дальше двигаем им
+      const [a]=[...vw.pts.values()];
+      vw.pinch=null; vw.pan={x:a.x,y:a.y,tx:vw.tx,ty:vw.ty};
+    } else if(!vw.pts.size){
+      if(e.type==='pointerup'&&vw.tap&&Date.now()-vw.tap.t<350) vwTap(e.clientX,e.clientY);
+      vw.pinch=vw.pan=vw.tap=null;
+    }
+  };
+  stage.addEventListener('pointerup',up);
+  stage.addEventListener('pointercancel',up);
+  // колесо и тачпад — когда смотрят с компьютера
+  stage.addEventListener('wheel',e=>{
+    e.preventDefault();
+    vwZoomAt(vw.s*Math.exp(-e.deltaY*(e.ctrlKey?.01:.002)),e.clientX,e.clientY);
+    vwMoving();
+  },{passive:false});
+  // ссылки внутри SVG никуда не ведут: тапы по ним разбирает vwTap
+  stage.addEventListener('click',e=>e.preventDefault());
+})();
+
+/* Двойной тап — приблизить или вписать обратно; одиночный — карточки фигуры */
+function vwTap(x,y){
+  const now=Date.now(), last=vw.lastTap;
+  clearTimeout(vw.tapT);
+  if(last&&now-last.t<320&&Math.hypot(x-last.x,y-last.y)<30){
+    vw.lastTap=null;
+    if(vw.s>vw.fit*1.6) vwFit(); else vwZoomAt(vw.s*3,x,y);
+    vwMoving();
+    return;
+  }
+  vw.lastTap={t:now,x,y};
+  vw.tapT=setTimeout(()=>{ vw.lastTap=null; vwSingleTap(x,y); },330);
+}
+/* Фигура без заливки ловит касание только своим контуром, поэтому ищем
+   по рамке: самая маленькая из ссылок, внутри которой тап */
+function vwLinkAt(x,y){
+  let best=null, area=Infinity;
+  document.querySelectorAll('#vw-content a').forEach(a=>{
+    const r=a.getBoundingClientRect();
+    if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom&&r.width*r.height<area){
+      best=a; area=r.width*r.height;
+    }
+  });
+  return best;
+}
+function vwSingleTap(x,y){
+  const a=vwLinkAt(x,y);
+  const href=a?(a.getAttribute('href')||a.getAttribute('xlink:href')||''):'';
+  if(href.startsWith('cards:')) showLinkedCards(href.slice(6).split(',').filter(Boolean));
+  else closeSheet();
+}
+
+function showLinkedCards(ids){
+  const cards=ids.map(id=>db.cards[id]).filter(Boolean);
+  document.getElementById('vw-sheet-title').textContent='Карточки блока · '+cards.length;
+  const body=document.getElementById('vw-sheet-body');
+  body.innerHTML=cards.length
+    ? cards.map(c=>{
+        const back=blocksHTML(c.back);
+        return '<div class="ol-card'+(starred(c)?' star':'')+'">'+
+          '<div class="ol-q">'+blocksHTML(c.front)+'</div>'+
+          (back.trim()
+            ? '<button class="ans-btn" onclick="this.nextElementSibling.classList.remove(\'hidden\');this.remove()">'+
+                'Показать ответ</button><div class="ol-a hidden">'+back+'</div>'
+            : '')+
+        '</div>';
+      }).join('')
+    : '<div class="empty" style="padding:24px">Карточек этого блока нет — возможно, их удалили на компьютере</div>';
+  document.getElementById('vw-sheet').classList.remove('hidden');
+  body.scrollTop=0;
+  enhance(body);
+}
+function closeSheet(){ document.getElementById('vw-sheet').classList.add('hidden'); }
+
+/* SVG доски → элемент для вставки в страницу. Файл свой, но вставляется
+   прямо в приложение, поэтому скрипты, обработчики и javascript:-ссылки выкидываем. */
+function svgFromText(text){
+  const doc=new DOMParser().parseFromString(text,'image/svg+xml');
+  const svg=doc.documentElement;
+  if(!svg||svg.nodeName.toLowerCase()!=='svg'||doc.querySelector('parsererror')) return null;
+  svg.querySelectorAll('script,foreignObject,style.style-fonts').forEach(el=>el.remove());
+  [svg,...svg.querySelectorAll('*')].forEach(el=>[...el.attributes].forEach(at=>{
+    if(/^on/i.test(at.name)||/^\s*javascript:/i.test(at.value)) el.removeAttribute(at.name);
+  }));
+  const vb=svg.viewBox?.baseVal;
+  const w=parseFloat(svg.getAttribute('width'))||vb?.width||1000;
+  const h=parseFloat(svg.getAttribute('height'))||vb?.height||1000;
+  svg.setAttribute('width',w); svg.setAttribute('height',h);
+  return {el:document.importNode(svg,true),w,h};
+}
+
+/* Доска: векторная SVG, а если её нет или не скачалась — миниатюра */
+async function openNote(id){
+  const n=db.notes[id]; if(!n) return;
+  const t=openViewerShell(n.title||'Без названия');
+  if(n.svg){
+    try{
+      const blob=await fileBlob(n.svg);
+      const svg=blob&&svgFromText(await blob.text());
+      if(t!==vw.token) return;
+      if(svg){ vwMount(svg.el,svg.w,svg.h); return; }
+    }catch(_){}
+  }
+  const url=n.preview?await imageURL(n.preview):null;
+  if(t!==vw.token) return;
+  if(!url){
+    vwMsg(cfg?'Не удалось загрузить доску — нет сети или файла в репозитории'
+             :'Подключите репозиторий, чтобы видеть доски');
+    return;
+  }
+  await vwImage(url,t,false);
+  toast(n.svg?'Доска целиком не скачалась — показана миниатюра'
+             :'Это миниатюра. Откройте доску на компьютере — сюда приедет полная версия');
+}
+
+/* Картинка или схема из карточки — тап по ней */
+document.addEventListener('click',e=>{
+  const img=e.target.closest?.('img.zoomable');
+  if(!img||img.closest('#viewer')||!img.src||img.classList.contains('img-loading')) return;
+  const t=openViewerShell(img.closest('.b-diagram')?'Схема':'');
+  vwImage(img.src,t,img.classList.contains('inverted'));
+});
+
 /* ═══════════════════ загрузка данных ═══════════════════ */
 function normalize(raw){
   const d={topics:raw.topics||{},cards:raw.cards||{},roots:raw.roots||[],
-           sets:raw.sets||{}};
+           sets:raw.sets||{},notes:raw.notes||{}};
   Object.values(d.topics).forEach(t=>{ t.children=t.children||[]; t.cards=t.cards||[]; });
   Object.values(d.cards).forEach(c=>{ c.mastery=c.mastery||0; c.star=!!c.star; });
   if(!d.roots.length){
@@ -1451,14 +2059,54 @@ function cancelLoad(){ if(db) goHome(); }
 window.CardsApp={
   get db(){return db}, get st(){return st}, get prog(){return prog}, get meta(){return meta},
   get useLS(){return useLS}, get cfg(){return cfg}, get sync(){return sync},
+  get vw(){return vw}, get swReg(){return swReg}, APP_VERSION,
   kvGet,kvPut,blocksHTML,normalize,mastery,starred,cardsOf,buildQueue,
-  orderedCards,currentList,cardText,sideText,imgPaths,sniffMime,imageURL,ghError
+  orderedCards,currentList,cardText,sideText,imgPaths,sniffMime,imageURL,ghError,
+  topicNotes,notesHTML,openNote,svgFromText,showLinkedCards,vwLinkAt,vwFit,versionLabel,
+  set db(v){db=normalize(v);plainCache.clear();}
 };
 
-/* Оболочка кэшируется, чтобы приложение открывалось без сети */
-if('serviceWorker' in navigator&&location.protocol==='https:'){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+/* Оболочка кэшируется, чтобы приложение открывалось без сети.
+   Новая версия (новый sw.js после deploy-app.py) ставится рядом со старой
+   и ждёт: внизу плашка «Обновить». Проверяем на старте и при возврате
+   в приложение — но не чаще раза в 10 минут. */
+let swReg=null, swChecked=0;
+function offerUpdate(){
+  if(swReg?.waiting&&navigator.serviceWorker.controller)
+    document.getElementById('update-bar').classList.remove('hidden');
+}
+function applyUpdate(){
+  const w=swReg?.waiting;
+  if(!w){ location.reload(); return; }
+  document.getElementById('update-btn').disabled=true;
+  w.postMessage('skip-waiting');          // дальше controllerchange → перезагрузка
+}
+function checkUpdate(){
+  if(!swReg||Date.now()-swChecked<10*60e3) return;
+  swChecked=Date.now();
+  swReg.update().catch(()=>{});
+}
+if('serviceWorker' in navigator&&window.isSecureContext){
+  // при самой первой установке контроллера не было — перезагружать незачем
+  const hadController=!!navigator.serviceWorker.controller;
+  let reloading=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(!hadController||reloading) return;
+    reloading=true; location.reload();
+  });
+  window.addEventListener('load',async()=>{
+    try{
+      swReg=await navigator.serviceWorker.register('sw.js');
+      swChecked=Date.now();
+      offerUpdate();
+      swReg.addEventListener('updatefound',()=>{
+        const w=swReg.installing;
+        w?.addEventListener('statechange',()=>{ if(w.state==='installed') offerUpdate(); });
+      });
+    }catch(_){}
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible') checkUpdate();
   });
 }
 window.addEventListener('online',()=>{ if(cfg) syncNow(false); });
