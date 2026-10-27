@@ -602,7 +602,7 @@ const DEMO = {"topics":{"ml":{"id":"ml","name":"Machine Learning","parentId":nul
 // сборка «для примерки»: карточки уже внутри файла, открывается сразу на темах
 const AUTOLOAD = false;
 // проставляет deploy-app.py: «20261025-1403-ab12cd34» — дата, время, отпечаток содержимого
-const APP_VERSION = "20261027-1253-47e3d8ea";
+const APP_VERSION = "20261027-1323-0f30c422";
 
 /* ═══════════════════ IndexedDB ═══════════════════
    Две независимые записи:
@@ -1903,6 +1903,34 @@ function vwLinkAt(x,y){
   });
   return best;
 }
+
+/* Значок ссылки на карточку, как на компьютере: внутри правого верхнего угла
+   фигуры, приглушённый, в единицах доски — растёт и уменьшается вместе с ней.
+   В SVG доски значков нет (их рисует только экран Excalidraw), поэтому ставим
+   сами, в <a> фигуры: тап по значку открывает те же карточки. Размеры — как
+   LINK_MARK и cardsLinkHooks.handle в index.html */
+const LINK_MARK_PATH=   // тот же значок, что рисует Excalidraw (feather external-link)
+  '<g fill="none" stroke="#1971c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+
+  '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>'+
+  '<polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></g>';
+function markLinks(svg){
+  const href=a=>a.getAttribute('href')||a.getAttribute('xlink:href')||'';
+  const links=[...svg.querySelectorAll('a')].filter(a=>href(a).startsWith('cards:'));
+  const boxes=links.map(a=>{ try{ return a.getBBox(); }catch(_){ return null; } });
+  const within=(b,o)=>b.x>=o.x&&b.y>=o.y&&b.x+b.width<=o.x+o.width&&b.y+b.height<=o.y+o.height&&
+                      b.width*b.height<o.width*o.height;
+  links.forEach((a,i)=>{
+    const b=boxes[i]; if(!b||!b.width) return;
+    // текст с формулами внутри блока ссылается туда же: значок один, у блока
+    if(links.some((o,j)=>href(o)===href(a)&&boxes[j]&&within(b,boxes[j]))) return;
+    const s=Math.max(8,Math.min(14,b.width*.3,b.height*.5)), k=s*.4;
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('transform','translate('+(b.x+b.width-k-s)+' '+(b.y+k)+') scale('+(s/24)+')');
+    g.setAttribute('opacity','.5');
+    g.innerHTML=LINK_MARK_PATH;
+    a.appendChild(g);
+  });
+}
 function vwSingleTap(x,y){
   const a=vwLinkAt(x,y);
   const href=a?(a.getAttribute('href')||a.getAttribute('xlink:href')||''):'';
@@ -1956,7 +1984,7 @@ async function openNote(id){
       const blob=await fileBlob(n.svg);
       const svg=blob&&svgFromText(await blob.text());
       if(t!==vw.token) return;
-      if(svg){ vwMount(svg.el,svg.w,svg.h); return; }
+      if(svg){ vwMount(svg.el,svg.w,svg.h); markLinks(svg.el); return; }
     }catch(_){}
   }
   const url=n.preview?await imageURL(n.preview):null;
