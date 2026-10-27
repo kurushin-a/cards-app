@@ -427,7 +427,6 @@ button{font-family:inherit;font-size:inherit;color:inherit;background:none;borde
 #vw-sheet-head span{flex:1}
 #vw-sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:0 12px calc(var(--safeB) + 16px)}
-.ans-btn{margin-top:10px;font-size:14px;color:var(--accentH);padding:6px 0}
 
 /* ── плашка «вышла новая версия» ────────────────── */
 #update-bar{position:fixed;left:12px;right:12px;bottom:calc(var(--safeB) + 14px);z-index:90;
@@ -603,7 +602,7 @@ const DEMO = {"topics":{"ml":{"id":"ml","name":"Machine Learning","parentId":nul
 // сборка «для примерки»: карточки уже внутри файла, открывается сразу на темах
 const AUTOLOAD = false;
 // проставляет deploy-app.py: «20261025-1403-ab12cd34» — дата, время, отпечаток содержимого
-const APP_VERSION = "20261025-1546-9e257d18";
+const APP_VERSION = "20261027-1253-47e3d8ea";
 
 /* ═══════════════════ IndexedDB ═══════════════════
    Две независимые записи:
@@ -1918,12 +1917,10 @@ function showLinkedCards(ids){
   body.innerHTML=cards.length
     ? cards.map(c=>{
         const back=blocksHTML(c.back);
+        // карточка сразу целиком: открыли блок, чтобы её прочитать
         return '<div class="ol-card'+(starred(c)?' star':'')+'">'+
           '<div class="ol-q">'+blocksHTML(c.front)+'</div>'+
-          (back.trim()
-            ? '<button class="ans-btn" onclick="this.nextElementSibling.classList.remove(\'hidden\');this.remove()">'+
-                'Показать ответ</button><div class="ol-a hidden">'+back+'</div>'
-            : '')+
+          (back.trim()?'<div class="ol-a">'+back+'</div>':'')+
         '</div>';
       }).join('')
     : '<div class="empty" style="padding:24px">Карточек этого блока нет — возможно, их удалили на компьютере</div>';
