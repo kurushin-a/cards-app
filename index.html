@@ -155,6 +155,13 @@ button{font-family:inherit;font-size:inherit;color:inherit;background:none;borde
   border:1px solid var(--border);background:var(--bg2)}
 .src-btn:active{background:var(--bg3)}
 
+.topic-path{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0 0 12px}
+.topic-path button{background:var(--bg2);color:var(--text2);padding:9px 10px;border-radius:8px}
+.topic-path span{padding:9px 4px;overflow-wrap:anywhere}
+.topic-folders{margin-bottom:16px}
+.topic-folders h2{font-size:13px;color:var(--text2);margin:8px 0}
+.topic-folders .row-name{white-space:normal;overflow-wrap:anywhere}
+
 /* progress bar under each topic */
 .row-bar{height:3px;background:var(--bg3)}
 .row-bar>i{display:block;height:100%;background:var(--green)}
@@ -602,7 +609,7 @@ const DEMO = {"topics":{"ml":{"id":"ml","name":"Machine Learning","parentId":nul
 // сборка «для примерки»: карточки уже внутри файла, открывается сразу на темах
 const AUTOLOAD = false;
 // проставляет deploy-app.py: «20261025-1403-ab12cd34» — дата, время, отпечаток содержимого
-const APP_VERSION = "20261027-1323-0f30c422";
+const APP_VERSION = "20261113-1417-9a595dbe";
 
 /* ═══════════════════ IndexedDB ═══════════════════
    Две независимые записи:
@@ -693,6 +700,7 @@ function sanitize(html){
     [...node.childNodes].forEach(ch=>{
       if(ch.nodeType===1){
         if(!RT_OK.has(ch.tagName)){
+          clean(ch);
           while(ch.firstChild) node.insertBefore(ch.firstChild,ch);
           node.removeChild(ch); return;
         }
@@ -944,6 +952,7 @@ function openList(tid){
   document.getElementById('search-clear').classList.add('hidden');
   show('list');
   renderList();
+  document.getElementById('cards').scrollTop=0;
 }
 
 function currentList(){
@@ -966,20 +975,44 @@ function markHits(text,q){
   return out;
 }
 
+// Folder navigation stays visible while searching within the current branch.
+function listFoldersHTML(tid){
+  const path=[], seen=new Set();
+  let id=tid;
+  while(id&&id!=='*'&&db.topics[id]&&!seen.has(id)){
+    seen.add(id); path.unshift(id); id=db.topics[id].parentId;
+  }
+  const action=id=>esc('openList('+JSON.stringify(id)+')');
+  const link=(id,label)=>'<button onclick="'+action(id)+'">'+esc(label)+'</button>';
+  let h='<nav class="topic-path" aria-label="Путь темы">'+link('*','Все темы');
+  path.forEach(id=>{ h+='<span>›</span>'+(id===tid?'<span aria-current="page">'+esc(db.topics[id].name)+'</span>':link(id,db.topics[id].name)); });
+  h+='</nav>';
+  const kids=(tid==='*'?db.roots:db.topics[tid]?.children||[]).filter(id=>db.topics[id]);
+  if(kids.length){
+    h+='<section class="topic-folders" aria-label="Подпапки"><h2>'+(tid==='*'?'Темы':'Подпапки')+'</h2>';
+    h+=kids.map(id=>'<div class="row"><button class="row-main" style="width:100%" onclick="'+action(id)+'">'+
+      '<span aria-hidden="true">📁</span><span class="row-name">'+esc(db.topics[id].name)+'</span>'+
+      '<span class="count">'+applyFilter(cardsOf(id)).length+'</span><span aria-hidden="true">›</span></button></div>').join('');
+    h+='</section>';
+  }
+  return h;
+}
+
 function renderList(){
   const el=document.getElementById('cards');
   const list=currentList();
   const q=st.query.trim().toLowerCase();
   st.listIds=list.map(c=>c.id);
 
+  const folders=listFoldersHTML(st.listScope);
   const notes=q?'':notesHTML(st.listScope);
   if(!list.length){
-    el.innerHTML=notes+'<div class="empty">'+
+    el.innerHTML=folders+notes+'<div class="empty">'+
       (q?'Ничего не найдено':'Здесь пока нет карточек по этому фильтру')+'</div>';
     loadImages(el);
     return;
   }
-  el.innerHTML=notes+list.map((c,i)=>{
+  el.innerHTML=folders+notes+list.map((c,i)=>{
     const m=Math.max(0,Math.min(5,mastery(c)));
     const t=cardText(c);
     // если совпадение только в ответе — показываем кусок ответа, иначе вопрос
@@ -1746,9 +1779,10 @@ async function fileBlob(name){
    вставляется прямо в страницу, поэтому чёткая при любом приближении;
    фигура со ссылкой «cards:…» по тапу показывает свои карточки. */
 const vw={open:false,w:1,h:1,s:1,fit:1,tx:0,ty:0,pts:new Map(),
-          pinch:null,pan:null,tap:null,lastTap:null,tapT:null,idleT:null,token:0};
+          pinch:null,pan:null,tap:null,lastTap:null,tapT:null,idleT:null,frame:null,token:0};
 
 function openViewerShell(title){
+  vwResetMotion();
   vw.token++;
   document.getElementById('vw-title').textContent=title||'';
   document.getElementById('vw-content').innerHTML='';
@@ -1767,6 +1801,7 @@ function closeViewer(){
 }
 function hideViewer(){
   vw.open=false; vw.token++;
+  vwResetMotion();
   clearTimeout(vw.tapT);
   document.getElementById('viewer').classList.add('hidden');
   document.getElementById('vw-content').innerHTML='';
@@ -1803,9 +1838,23 @@ function vwFit(){
   vwApply();
 }
 function vwClamp(s){ return Math.min(Math.max(s,vw.fit*.5),Math.max(vw.fit*4,6)); }
+// Pointer events may arrive several times per frame: paint only the latest state.
 function vwApply(){
-  document.getElementById('vw-content').style.transform=
-    'translate('+vw.tx+'px,'+vw.ty+'px) scale('+vw.s+')';
+  if(vw.frame!==null) return;
+  vw.frame=requestAnimationFrame(()=>{
+    vw.frame=null;
+    if(!vw.open) return;
+    document.getElementById('vw-content').style.transform=
+      'translate('+vw.tx+'px,'+vw.ty+'px) scale('+vw.s+')';
+  });
+}
+function vwResetMotion(){
+  clearTimeout(vw.tapT); vw.tapT=null;
+  if(vw.frame!==null) cancelAnimationFrame(vw.frame);
+  vw.frame=null;
+  clearTimeout(vw.idleT); vw.idleT=null;
+  document.getElementById('vw-content').classList.remove('moving');
+  vw.pts.clear(); vw.pinch=vw.pan=vw.tap=vw.lastTap=null;
 }
 /* масштаб s вокруг точки экрана (x,y): точка под пальцем остаётся на месте */
 function vwZoomAt(s,x,y){
@@ -1819,7 +1868,13 @@ function vwMoving(){
   const box=document.getElementById('vw-content');
   box.classList.add('moving');
   clearTimeout(vw.idleT);
-  vw.idleT=setTimeout(()=>box.classList.remove('moving'),180);
+  // Do not discard the composited layer while fingers are still on the screen.
+  // A pause in a pinch used to remove/recreate it, repainting the whole SVG.
+  if(vw.pts.size) return;
+  vw.idleT=setTimeout(()=>{
+    vw.idleT=null;
+    if(!vw.pts.size) box.classList.remove('moving');
+  },250);
 }
 
 (function(){
@@ -1828,6 +1883,7 @@ function vwMoving(){
     try{ stage.setPointerCapture(e.pointerId); }catch(_){}
     document.getElementById('vw-hint').classList.add('hidden');   // разобрались — подсказка не нужна
     vw.pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    vwMoving();
     if(vw.pts.size===1){
       vw.pan={x:e.clientX,y:e.clientY,tx:vw.tx,ty:vw.ty};
       vw.tap={x:e.clientX,y:e.clientY,t:Date.now()};
@@ -1864,6 +1920,7 @@ function vwMoving(){
     } else if(!vw.pts.size){
       if(e.type==='pointerup'&&vw.tap&&Date.now()-vw.tap.t<350) vwTap(e.clientX,e.clientY);
       vw.pinch=vw.pan=vw.tap=null;
+      vwMoving();
     }
   };
   stage.addEventListener('pointerup',up);
