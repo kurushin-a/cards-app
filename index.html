@@ -413,6 +413,8 @@ button{font-family:inherit;font-size:inherit;color:inherit;background:none;borde
 #viewer{position:fixed;inset:0;z-index:60;background:#121212;overflow:hidden}
 #vw-stage{position:absolute;inset:0;touch-action:none;overflow:hidden}
 #vw-content{position:absolute;left:0;top:0;transform-origin:0 0}
+#vw-content.vector{inset:0;contain:paint}
+#vw-content.vector>svg{width:100%;height:100%}
 #vw-content>img,#vw-content>svg{display:block;max-width:none;user-select:none;-webkit-user-select:none}
 #vw-content.moving{will-change:transform}
 #vw-bar{position:absolute;left:0;right:0;top:0;z-index:2;display:flex;align-items:center;gap:8px;
@@ -609,7 +611,7 @@ const DEMO = {"topics":{"ml":{"id":"ml","name":"Machine Learning","parentId":nul
 // сборка «для примерки»: карточки уже внутри файла, открывается сразу на темах
 const AUTOLOAD = false;
 // проставляет deploy-app.py: «20261025-1403-ab12cd34» — дата, время, отпечаток содержимого
-const APP_VERSION = "20261113-1417-9a595dbe";
+const APP_VERSION = "20261124-0922-5115b2e9";
 
 /* ═══════════════════ IndexedDB ═══════════════════
    Две независимые записи:
@@ -1779,7 +1781,8 @@ async function fileBlob(name){
    вставляется прямо в страницу, поэтому чёткая при любом приближении;
    фигура со ссылкой «cards:…» по тапу показывает свои карточки. */
 const vw={open:false,w:1,h:1,s:1,fit:1,tx:0,ty:0,pts:new Map(),
-          pinch:null,pan:null,tap:null,lastTap:null,tapT:null,idleT:null,frame:null,token:0};
+          pinch:null,pan:null,tap:null,lastTap:null,tapT:null,idleT:null,frame:null,token:0,
+          vector:null};
 
 function openViewerShell(title){
   vwResetMotion();
@@ -1816,10 +1819,24 @@ function vwMsg(text){
 }
 function vwMount(node,w,h){
   const box=document.getElementById('vw-content');
-  box.innerHTML=''; box.appendChild(node);
+  box.innerHTML=''; box.style.transform='';
+  if(node.localName==='svg'){
+    // Keep the outer viewport screen-sized and transform the board in SVG coordinates.
+    const viewport=document.createElementNS(node.namespaceURI,'svg');
+    vw.vector=document.createElementNS(node.namespaceURI,'g');
+    vw.vector.appendChild(node);
+    viewport.appendChild(vw.vector);
+    box.classList.add('vector');
+    box.appendChild(viewport);
+  } else {
+    box.appendChild(node);
+  }
   vw.w=Math.max(1,w); vw.h=Math.max(1,h);
-  vwMsg('');
   vwFit();
+  cancelAnimationFrame(vw.frame);
+  vw.frame=null;
+  vwPaint();
+  vwMsg('');
 }
 function vwImage(url,token,inverted){
   return new Promise(res=>{
@@ -1838,14 +1855,21 @@ function vwFit(){
   vwApply();
 }
 function vwClamp(s){ return Math.min(Math.max(s,vw.fit*.5),Math.max(vw.fit*4,6)); }
+function vwPaint(){
+  if(vw.vector){
+    vw.vector.setAttribute('transform','translate('+vw.tx+' '+vw.ty+') scale('+vw.s+')');
+  } else {
+    document.getElementById('vw-content').style.transform=
+      'translate('+vw.tx+'px,'+vw.ty+'px) scale('+vw.s+')';
+  }
+}
 // Pointer events may arrive several times per frame: paint only the latest state.
 function vwApply(){
   if(vw.frame!==null) return;
   vw.frame=requestAnimationFrame(()=>{
     vw.frame=null;
     if(!vw.open) return;
-    document.getElementById('vw-content').style.transform=
-      'translate('+vw.tx+'px,'+vw.ty+'px) scale('+vw.s+')';
+    vwPaint();
   });
 }
 function vwResetMotion(){
@@ -1853,7 +1877,8 @@ function vwResetMotion(){
   if(vw.frame!==null) cancelAnimationFrame(vw.frame);
   vw.frame=null;
   clearTimeout(vw.idleT); vw.idleT=null;
-  document.getElementById('vw-content').classList.remove('moving');
+  vw.vector=null;
+  document.getElementById('vw-content').classList.remove('moving','vector');
   vw.pts.clear(); vw.pinch=vw.pan=vw.tap=vw.lastTap=null;
 }
 /* масштаб s вокруг точки экрана (x,y): точка под пальцем остаётся на месте */
@@ -1865,6 +1890,7 @@ function vwZoomAt(s,x,y){
 }
 /* Во время жеста слой двигается готовым растром — плавно; после — перерисовка в полную чёткость */
 function vwMoving(){
+  if(vw.vector) return;
   const box=document.getElementById('vw-content');
   box.classList.add('moving');
   clearTimeout(vw.idleT);
